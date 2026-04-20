@@ -80,11 +80,14 @@
 <script setup>
 import { defineProps, computed } from 'vue';
 
+function getImage(name)
+{
+    return new URL(`/src/assets/resources/img/${name}`,import.meta.url).href
+}
+
 const props = defineProps({
     mealID: String
 });
-
-
 
 
 //arrays of meals
@@ -92,77 +95,77 @@ const meals = [
     {
         id: '01',
         name: 'Fast Peppered Beef Wraps',
-        imageUrl: '/src/assets/resources/img/beefwraps/beef-wraps.jpeg',
+        imageUrl: getImage('beefwraps/beef-wraps.jpeg'),
         nameExtend: 'with Chimichurri Tomato and Aioli',
         tags: ['FAST', 'MEAT', 'FAMILY_FRIENDLY', 'DAIRY-FREE', 'OPTIONAL SPICE', '>40G PROTEIN'],
         description: "These wraps are a perfect blend of tender, juicy steak strips layered with fresh,crisp spinach and vibrant tomatoes, all topped with a chimichrri sauce. Perfect for a quick lunch or a light dinner, these wraps are as nutritious as they are delicious, making them an ideal choice for those seeking a balanced and tasty meal. Enjoy the richness of quality steak combined with the freshness of garden veggies in every wrap!",
         nutriFacts: ['820', '41.1', '44.7', '52'],
         ingredients: [
             {
-                ingreImg: '/src/assets/resources/img/beefwraps/aioli-mayo.jpg',
+                ingreImg: getImage('beefwraps/aioli-mayo.jpg'),
                 ingreName: '50g aioli mayonnaise'
             },
             {
-                ingreImg: '/src/assets/resources/img/beefwraps/beef-stirfry.jpg',
+                ingreImg: getImage('beefwraps/beef-stirfry.jpg'),
                 ingreName: 'beef stir-fry'
             },
             {
-                ingreImg: '/src/assets/resources/img/beefwraps/oregano.jpeg',
+                ingreImg: getImage('beefwraps/oregano.jpeg'),
                 ingreName: '2g dried oregano'
             },
             {
-                ingreImg: '/src/assets/resources/img/beefwraps/parsley.jpg',
+                ingreImg: getImage('beefwraps/parsley.jpg'),
                 ingreName: 'parsley'
             },
             {
-                ingreImg: '/src/assets/resources/img/beefwraps/red-onion.jpeg',
+                ingreImg: getImage('beefwraps/red-onion.jpeg'),
                 ingreName: '1 red onion',
             },
             {
-                ingreImg: '/src/assets/resources/img/beefwraps/seasoning.jpeg',
+                ingreImg: getImage('beefwraps/seasoning.jpeg'),
                 ingreName: '10g pepper and garlic seasoning'
             },
             {
-                ingreImg: '/src/assets/resources/img/beefwraps/spinach.jpeg',
+                ingreImg: getImage('beefwraps/spinach.jpeg'),
                 ingreName: '50g baby spinach leaves'
             },
             {
-                ingreImg: '/src/assets/resources/img/beefwraps/tomato.jpg',
+                ingreImg: getImage('beefwraps/tomato.jpg'),
                 ingreName: '1 tomato'
             },
             {
-                ingreImg: '/src/assets/resources/img/beefwraps/tortilla.jpeg',
+                ingreImg: getImage('beefwraps/tortilla.jpeg'),
                 ingreName: '6 flour tortillas'
             }
         ],
         steps: [
             {
-                stepImg: '/src/assets/resources/img/beefwraps/step1.jpeg',
+                stepImg: getImage('beefwraps/step1.jpeg'),
                 stepTitle: '1. Prep ingredients',
                 stepText: 'Finely chop the <span>onion</span> and <span>parsley</span>, including the parsley stems.'
             },
             {
-                stepImg: '/src/assets/resources/img/beefwraps/step2.jpeg',
+                stepImg: getImage('beefwraps/step2.jpeg'),
                 stepTitle: '2. Make chimichurri',
                 stepText: 'Put <span>1½ tsp dried oregano*, 1 tbs red wine vinegar</span> and <span>1 tbs extra virgin olive oil</span> in a large bowl. Add the <span>onion</span> and <span>parsley</span> and season with <span>salt and pepper</span>.'
             },
             {
-                stepImg: '/src/assets/resources/img/beefwraps/step3.jpeg',
+                stepImg: getImage('beefwraps/step3.jpeg'),
                 stepTitle: '3. Prep tomato',
                 stepText: 'Cut the <span>tomato</span> into thin wedges, add to the chimichurri and stir to combine.</p>'
             },
             {
-                stepImg: '/src/assets/resources/img/beefwraps/step4.jpeg',
+                stepImg: getImage('beefwraps/step4.jpeg'),
                 stepTitle: '4. Cook Beef',
                 stepText: 'Separate the <span>beef stir-fry</span>. Heat <span>20g butter</span> in a large frypan over medium-high heat. Stir-fry the beef for 1-2 mins until browned (beef stir-fry is best with fast cooking; get the pan hot and stick to the short cooking time). Add <span>3 tsp pepper and garlic seasoning</span> (reduce the seasoning for a milder pepper kick) and cook, stirring, for 1 min or until fragrant. Remove from the pan.</p>'
             },
             {
-                stepImg: '/src/assets/resources/img/beefwraps/step5.jpeg',
+                stepImg: getImage('beefwraps/step5.jpeg'),
                 stepTitle: '5. Warm tortillas',
                 stepText: 'Heat <span>a drizzle of olive oil</span> in the same pan over high heat. Warm the <span>tortillas</span>, in batches, for 30 secs each side or until heated through and golden.'
             },
             {
-                stepImg: '/src/assets/resources/img/beefwraps/step6.jpeg',
+                stepImg: getImage('beefwraps/step6.jpeg'),
                 stepTitle: '6. Get ready to serve',
                 stepText: 'Spread the <span>tortillas</span> with the <span>aioli</span> and divide among plates. Fill with the <span>spinach, beef</span> and <span>chimichurri tomato</span> to serve.</p>'
             }
@@ -171,73 +174,73 @@ const meals = [
     {
         id: '02',
         name: 'Easy Veggie and Haloumi Salad',
-        imageUrl: '/src/assets/resources/img/haloumisalad/haloumi-salad.jpeg',
+        imageUrl: getImage('haloumisalad/haloumi-salad.jpeg'),
         nameExtend: 'with Red Pesto Dressing',
         tags: ['VEGETARIAN', 'NO ADDED GLUTEN', 'FAMILY-FRIENDLY', '3+ VEG SERVES'],
         description: "Welcome to a burst of flavors with this Easy Veggie and Haloumi Salad! Grilled to perfection, the Haloumi adds a savory touch to the fresh, colorful veggies, all beautifully complemented by a rich red pesto dressing. This dish is not just a meal—it's a celebration of wholesome, delicious eating! Enjoy!",
         nutriFacts: ['750', '27.9', '40.4', '51.3'],
         ingredients: [
             {
-                ingreImg: '/src/assets/resources/img/haloumisalad/sweet-potato.jpg',
+                ingreImg: getImage('haloumisalad/sweet-potato.jpg'),
                 ingreName: '2 small sweet potatoes'
             },
             {
-                ingreImg: '/src/assets/resources/img/haloumisalad/cauliflower.jpg',
+                ingreImg: getImage('haloumisalad/cauliflower.jpg'),
                 ingreName: '250g cauliflower'
             },
             {
-                ingreImg: '/src/assets/resources/img/haloumisalad/capsicum.jpeg',
+                ingreImg:getImage('haloumisalad/capsicum.jpeg'),
                 ingreName: '1 capsicum'
             },
             {
-                ingreImg: '/src/assets/resources/img/haloumisalad/red-onion.jpeg',
+                ingreImg:getImage('haloumisalad/red-onion.jpeg'),
                 ingreName: '1 red onion'
             },
             {
-                ingreImg: '/src/assets/resources/img/haloumisalad/smoke-bbq.jpeg',
+                ingreImg:getImage('haloumisalad/smoke-bbq.jpeg'),
                 ingreName: '5g smokey barbecue seasoning',
             },
             {
-                ingreImg: '/src/assets/resources/img/haloumisalad/red-pesto.jpeg',
+                ingreImg:getImage('haloumisalad/red-pesto.jpeg'),
                 ingreName: '50g red pesto'
             },
             {
-                ingreImg: '/src/assets/resources/img/haloumisalad/haloumi.jpg',
+                ingreImg:getImage('haloumisalad/haloumi.jpg'),
                 ingreName: '180g haloumi'
             },
             {
-                ingreImg: '/src/assets/resources/img/haloumisalad/salad-leaves.jpeg',
+                ingreImg:getImage('haloumisalad/salad-leaves.jpeg'),
                 ingreName: '50g mixed salad leaves'
             }
         ],
         steps: [
             {
-                stepImg: '/src/assets/resources/img/haloumisalad/step1.jpeg',
+                stepImg: getImage('haloumisalad/step1.jpeg'),
                 stepTitle: '1. Prep vegetables',
                 stepText: 'Preheat the oven to 200C, fan-forced. Line a large oven tray with baking paper. Cut the <span>unpeeled sweet potatoes</span> into 1.5cm chunks. Coarsely chop the <span>cauliflower</span> stem, then cut the head into small florets. Thinly slice the <span>capsicum</span>. Cut the <span>onion</span> into thin wedges.'
             },
             {
-                stepImg: '/src/assets/resources/img/haloumisalad/step2.jpeg',
+                stepImg: getImage('haloumisalad/step2.jpeg'),
                 stepTitle: '2. Roast vegetables',
                 stepText: 'Put the <span>sweet potato, cauliflower, capsicum</span> and <span>onion</span> on the lined tray. Drizzle with <span>1 tbs olive oil</span> and scatter with the <span>barbecue seasoning</span>, then toss to coat. Roast for 20-25 mins until golden and tender.'
             },
             {
-                stepImg: '/src/assets/resources/img/haloumisalad/step3.jpeg',
+                stepImg: getImage('haloumisalad/step3.jpeg'),
                 stepTitle: '3. Make dressing',
                 stepText: 'Meanwhile, combine the <span>red pesto, 2 tsp extra virgin olive oil</span> and <span>2 tsp red wine vinegar</span> in a large bowl and season with <span>salt and pepper</span>.'
             },
             {
-                stepImg: '/src/assets/resources/img/haloumisalad/step4.jpeg',
+                stepImg: getImage('haloumisalad/step4.jpeg'),
                 stepTitle: '4. Prep haloumi',
                 stepText: 'Slice the <span>haloumi</span> and dry on paper towel.'
             },
             {
-                stepImg: '/src/assets/resources/img/haloumisalad/step5.jpeg',
+                stepImg: getImage('haloumisalad/step5.jpeg'),
                 stepTitle: '5. Cook haloumi',
                 stepText: 'Heat <span>2 tsp olive oil</span> in a medium frypan over medium-high heat. Cook the <span>haloumi</span> for 2 mins each side or until golden. Remove from the pan.'
             },
             {
-                stepImg: '/src/assets/resources/img/haloumisalad/step6.jpeg',
+                stepImg: getImage('haloumisalad/step6.jpeg'),
                 stepTitle: '6. Get ready to serve',
                 stepText: 'Add the <span>roasted vegetables</span> and <span>salad leaves</span> to the dressing and toss to combine. Divide the <span>salad</span> and <span>haloumi</span> among bowls to serve.'
             }

@@ -46,6 +46,14 @@
 
 <script setup>
 import {ref} from 'vue';
+import beefWraps from '/src/assets/resources/img/beefwraps/beef-wraps.jpeg';
+import haloumiSalads from '/src/assets/resources/img/haloumisalad/haloumi-salad.jpeg';
+import musselRissoto from '/src/assets/resources/img/musselrisotto/mussel_risotto.jpeg';
+import sesameSalmon from '/src/assets/resources/img/sesamesalmon/sesame_salmon.jpeg';
+import lambPizza from '/src/assets/resources/img/lambpizza/lamb_pizza.jpeg';
+import butterWings from '/src/assets/resources/img/butterchicken/butter_chicken.jpeg';
+import noodleSoup from '/src/assets/resources/img/noodlesoup/noodle_soup.jpeg';
+import chickenWings from '/src/assets/resources/img/chickenwings/chicken_wings.jpeg';
 
 const searchMeal = ref('');
 
@@ -54,49 +62,49 @@ const meals = ref([
         id:'01',
         title:'Fast Peppered Beef Wraps',
         description:'with Chimichurri Tomato and Aioli',
-        image:'/src/assets/resources/img/beefwraps/beef-wraps.jpeg',
+        image: beefWraps,
     },
     {
         id:'02',
         title:'Easy Veggie and Haloumi Salad',
         description:'with Red Pesto Dressing',
-        image:'/src/assets/resources/img/haloumisalad/haloumi-salad.jpeg',
+        image:haloumiSalads,
     },
     {
         id:'03',
         title:'Mediterranean Mussel and Tomato Risotto',
         description:'with Fresh Spinach and Parsley',
-        image:'/src/assets/resources/img/musselrisotto/mussel_risotto.jpeg'
+        image:musselRissoto
     },
     {
         id:'04',
         title:'Sesame Soy-Glazed Salmon',
         description:'with Broccoli, Pak Choy and Brown Rice',
-        image:'/src/assets/resources/img/sesamesalmon/sesame_salmon.jpeg'
+        image:sesameSalmon
     },
     {
         id:'05',
         title:'Lebanese-Style Lamb Pizza',
         description:'with Spinach Salad and Mint Yoghurt',
-        image:'/src/assets/resources/img/lambpizza/lamb_pizza.jpeg'
+        image:lambPizza
     },
     {
         id:'06',
         title:'Easy Plant-Based Butter Chicken',
         description:'with Cumin Rice and Quick Red Onion Pickle',
-        image:'/src/assets/resources/img/butterchicken/butter_chicken.jpeg'
+        image:butterWings
     },
     {
         id:'07',
         title:'Chicken Dumpling-Noodle Soup',
         description:'with Greens and Chilli Vinegar',
-        image:'/src/assets/resources/img/noodlesoup/noodle_soup.jpeg'
+        image:noodleSoup
     },
     {
         id:'08',
         title:'Sticky Chicken Wings',
         description:'with Coconut Rice and Stir-Fried Vegetables',
-        image:'/src/assets/resources/img/chickenwings/chicken_wings.jpeg'
+        image:chickenWings
     }
 
 
