@@ -3,7 +3,7 @@
     <div class="container-bg">
         <div class="row align-items-center">
             <div class="col-lg-6 order-lg-2">
-                <div id="carousel_img" class="carousel slide carousel-fade" data-bs-ride="carousel" data-interval="5000">
+                <div id="carousel_img" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
                     <div class="carousel-inner">
                         <div class="carousel-item">
                             <img src="/src/assets/resources/img/carousel-img1.jpg" class="d-block w-100" alt="...">
@@ -41,7 +41,7 @@
 
 
     <section class="container mt-5" id="how-it-works-section">
-        <h2 class="text-center mb-5">How <span style="color:#ff603d">Feastbox</span> Meal Kit Delivery Works</h2>
+        <h2 class="text-center mb-5">How <span class="text-brand">Feastbox</span> Meal Kit Delivery Works</h2>
         <div class="row align-items-center mb-5">
             <div class="col-lg-6 px-5">
                 <h2>01 | Choose your meals</h2>
@@ -105,7 +105,7 @@
 
                     <div class="card-body text-center">
                         <h5 class="card-title">Classic Comforts</h5>
-                        <p class="card-text lead">Timeless dishes that bring warmth and familiraity</p>
+                        <p class="card-text lead">Timeless dishes that bring warmth and familiarity</p>
                     </div>
                 </div>
             </div>
@@ -132,7 +132,7 @@
                     </div>
 
                     <div class="card-body text-center">
-                        <h5 class="card-title">Vegetartian Delight</h5>
+                        <h5 class="card-title">Vegetarian Delight</h5>
                         <p class="card-text lead">Fresh, wholesome, and full of flavor, these plant-based meals showcase
                             the best of seasonal produce
                         </p>
@@ -227,7 +227,7 @@ section {
 }
 
 #variety img{
-    scale: 1.35;
+    transform: scale(1.35);
 }
 
 #vegetarian img{

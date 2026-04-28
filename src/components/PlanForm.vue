@@ -1,6 +1,6 @@
 <template>
     <div class="container mt-5" id="plan">
-        <h4 class="fw-bold">Choose the right <span style="color:#ff603d ;">Feast</span>Box meal kit for you</h4>
+        <h4 class="fw-bold">Choose the right <span class="text-brand">Feast</span>Box meal kit for you</h4>
         <div class="mt-4">
             <div class="row">
                 <!-- Meal Preferences Section -->
@@ -31,8 +31,8 @@
 
                         </label>
 
-                        <input type="radio" class="btn-check" name="mealPreference" id="lean&health" value="Lean & Healthy" v-model="planData.preference">
-                        <label class="btn btn-custom-plan text-start d-flex align-items-center" for="lean&health">
+                        <input type="radio" class="btn-check" name="mealPreference" id="lean-and-health" value="Lean & Healthy" v-model="planData.preference">
+                        <label class="btn btn-custom-plan text-start d-flex align-items-center" for="lean-and-health">
                             <img src="/src/assets/resources/img/lean.png" width="45px" class="me-3">
                             <div>
                                 <strong>Lean & Healthy</strong><br>
@@ -85,7 +85,7 @@
 
                     <div class="pricing-info mt-4">
                         <div class="text-center">
-                            <h6 class="text-muted fs-5"><span class="text-danger">$6.99</span> per serving</h6>
+                            <h6 class="text-muted fs-5"><span class="text-danger">${{ PRICE_PER_SERVING }}</span> per serving</h6>
                             <p>{{ planData.mealPerWeek }} meals for {{ planData.serving }} people each week ({{ totalServings }} servings in total)</p>
                             <hr>
                         </div>
@@ -95,7 +95,7 @@
                             <tbody>
                                 <tr>
                                     <td>Box price</td>
-                                    <td class="text-end">${{ totalPrice }}</td>
+                                    <td class="text-end">${{ totalPrice.toFixed(2) }}</td>
                                 </tr>
                                 <tr>
                                     <td>Shipping</td>
@@ -103,7 +103,7 @@
                                 </tr>
                                 <tr>
                                     <td>Total amount</td>
-                                    <td class="text-end"><strong>${{ totalPrice }}</strong></td>
+                                    <td class="text-end"><strong>${{ totalPrice.toFixed(2) }}</strong></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -117,21 +117,17 @@
 </template>
 
 <script setup>
-import { useMealForm } from '../stores/form';
-import { useRouter } from 'vue-router';
-import { computed } from 'vue';
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
+import { useMealForm, PRICE_PER_SERVING } from '../stores/form'
 
-const emit = defineEmits(['switchStep']);
 const router = useRouter();
-const MealForm = useMealForm();
+const MealForm = useMealForm()
 
-const planData = MealForm.planData;
-const totalServings = computed(() => MealForm.totalServings);
-const totalPrice = computed(() => MealForm.totalPrice);
+const { planData, totalServings, totalPrice } = storeToRefs(MealForm)
 
 function switchStep() {
-  emit('switchStep', 2); 
-  router.push('/deliveryform');
+  router.push({ name: 'deliveryform' });
 }
 </script>
 

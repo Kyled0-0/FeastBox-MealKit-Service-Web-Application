@@ -9,35 +9,35 @@
                     <div class="row mb-3">
                         <div class="col">
                             <label for="firstName" class="form-label">First name *</label>
-                            <input type="text" class="form-control" v-model="deliveryData.firstName" @input="validate('firstName')"  required>
+                            <input type="text" class="form-control" v-model="deliveryData.firstName" @input="validate('firstName', deliveryData)"  required>
                             <p v-if="errors.firstName" class="text-danger fst-italic">{{ errors.firstName }}</p>
                         </div>
                         <div class="col">
                             <label for="lastName" class="form-label">Last name *</label>
-                            <input type="text" class="form-control" v-model="deliveryData.lastName" @input="validate('lastName')"  required>
+                            <input type="text" class="form-control" v-model="deliveryData.lastName" @input="validate('lastName', deliveryData)"  required>
                             <p v-if="errors.lastName" class="text-danger fst-italic">{{ errors.lastName }}</p>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="address" class="form-label">Address *</label>
-                        <input type="text" class="form-control" v-model="deliveryData.address" @input="validate('address')"  required>
+                        <input type="text" class="form-control" v-model="deliveryData.address" @input="validate('address', deliveryData)"  required>
                         <p v-if="errors.address" class="text-danger fst-italic">{{ errors.address }}</p>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label for="postcode" class="form-label">Postcode *</label>
-                            <input type="text" class="form-control" v-model="deliveryData.postcode" @input="validate('postcode')"  required>
+                            <input type="text" class="form-control" v-model="deliveryData.postcode" @input="validate('postcode', deliveryData)"  required>
                             <p v-if="errors.postcode" class="text-danger fst-italic">{{ errors.postcode }}</p>
                         </div>
                         <div class="col">
                             <label for="suburb" class="form-label">Suburb *</label>
-                            <input type="text" class="form-control" v-model="deliveryData.suburb" @input="validate('suburb')" required>
+                            <input type="text" class="form-control" v-model="deliveryData.suburb" @input="validate('suburb', deliveryData)" required>
                             <p v-if="errors.suburb" class="text-danger fst-italic">{{ errors.suburb }}</p>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="state" class="form-label">State *</label>
-                        <select class="form-select" v-model="deliveryData.state" @change="validate('state')" required>
+                        <select class="form-select" v-model="deliveryData.state" @change="validate('state', deliveryData)" required>
                             <option value="NSW">NSW</option>
                             <option value="VIC">VIC</option>
                             <option value="QLD">QLD</option>
@@ -47,7 +47,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="phone" class="form-label">Phone number *</label>
-                        <input type="tel" class="form-control" v-model="deliveryData.phone" @input="validate('phone')"  required>
+                        <input type="tel" class="form-control" v-model="deliveryData.phone" @input="validate('phone', deliveryData)"  required>
                         <p v-if="errors.phone" class="text-danger fst-italic">{{ errors.phone }}</p>
                     </div>
                     <div class="mb-3">
@@ -69,7 +69,7 @@
                     <div class="mb-3">
                         <label for="deliveryDate" class="form-label">Choose your first delivery date</label>
                         <select class="form-select" v-model="deliveryData.deliveryDate">
-                            <option v-for="date in deliveryDates" :key="date" :value="date">{{ date }}</option>
+                            <option v-for="date in deliveryDates" :key="date.label" :value="date.label">{{ date.label }}</option>
                         </select>
                     </div>
 
@@ -97,32 +97,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useMealForm } from '../stores/form';
-import { useRouter } from 'vue-router';
-import { defineEmits } from 'vue';
+import { ref, onMounted, computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
+import { useMealForm } from '../stores/form'
+import { useFormValidation } from '@/composables/useFormValidation'
+import { required, digits } from '@/composables/validators'
 
-const MealForm = useMealForm();
-const deliveryData = MealForm.deliveryData;
-const emit = defineEmits(['switchStep']);
+const MealForm = useMealForm()
+const { deliveryData } = storeToRefs(MealForm)
+const { updateDelivery } = MealForm
 const router = useRouter();
 
-
-const errors = ref({});
-
-
-const validate = (field) => {
-    const value = deliveryData[field];
-    if (!value) {
-        errors.value[field] = "This field can't be blank";
-    } else if (field === 'phone' && value.length !== 10) {
-        errors.value.phone = 'Invalid phone number';
-    } else if (field === 'postcode' && value.length !== 4) {
-        errors.value.postcode = 'Invalid postcode';
-    } else {
-        errors.value[field] = '';
-    }
-};
+const { errors, validate, validateAll, isValid } = useFormValidation({
+  firstName: [required()],
+  lastName: [required()],
+  address: [required()],
+  postcode: [required(), digits(4, 'Postcode must be 4 digits')],
+  suburb: [required()],
+  state: [required()],
+  phone: [required(), digits(10, 'Phone must be exactly 10 digits')]
+});
 
 const deliveryDates = ref([]);
 const generateDeliveryDates = () => {
@@ -134,14 +129,16 @@ const generateDeliveryDates = () => {
         for (let i = 0; i < 7; i++) {
             const futureDate = new Date(currentDate);
             futureDate.setDate(currentDate.getDate() + i);
-            newDates.push(futureDate.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' }));
+            newDates.push({
+                label: futureDate.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' }),
+                weekday: futureDate.toLocaleDateString('en-US', { weekday: 'long' }),
+            });
         }
 
         deliveryDates.value = newDates;
 
-        
-        if (!deliveryData.deliveryDate) {
-            MealForm.updateDelivery('deliveryDate', newDates[0]);
+        if (!deliveryData.value.deliveryDate) {
+            updateDelivery('deliveryDate', newDates[0].label);
         }
     }
 };
@@ -149,20 +146,16 @@ onMounted(generateDeliveryDates);
 
 
 const deliveryDay = computed(() => {
-    const date = new Date(deliveryData.deliveryDate);
-    date.setDate(date.getDate() + 1);
-    return date.toLocaleDateString('en-US', {weekday: 'long'});
+    const match = deliveryDates.value.find(d => d.label === deliveryData.value.deliveryDate);
+    return match?.weekday ?? '';
 });
 
 
 const handleSubmit = () => {
-    
-    Object.keys(deliveryData).forEach(field => validate(field));
-
-    if (Object.values(errors.value).every(error => !error)) {
-        emit('switchStep', 3); 
-        router.push('/paymentform'); 
-    }
+  validateAll(deliveryData.value)
+  if (isValid.value) {
+    router.push({ name: 'paymentform' })
+  }
 };
 </script>
 

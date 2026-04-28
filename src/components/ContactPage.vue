@@ -5,39 +5,39 @@
                 <div class="col-md-7 contact-form">
                     <div class="py-4">
                         <h3>Contact Form</h3>
-                        <form>
+                        <form @submit.prevent="handleSubmit">
                             <div class="mb-3">
                                 <input type="text" class="form-control" id="inputName" placeholder="Name"
-                                    onchange="addIcon('inputName','helpName')" required>
-                                <div><i class="bi icon" id="helpName"></i></div>
+                                    v-model="form.name" @input="validate('name', form)" required>
+                                <p v-if="errors.name" class="text-danger fst-italic">{{ errors.name }}</p>
                             </div>
                             <div class="mb-3">
                                 <input type="email" class="form-control" id="inputEmail" placeholder="Email Address"
-                                    onchange="addIcon('inputEmail','helpEmail')" required>
-                                <div><i class="bi icon" id="helpEmail"></i></div>
+                                    v-model="form.email" @input="validate('email', form)" required>
+                                <p v-if="errors.email" class="text-danger fst-italic">{{ errors.email }}</p>
                             </div>
                             <div class="mb-3">
                                 <input type="text" class="form-control" id="inputPhone" placeholder="Phone Number"
-                                    onchange="addIcon('inputPhone','helpPhone')" required>
-                                <div><i class="bi icon" id="helpPhone"></i></div>
+                                    v-model="form.phone" @input="validate('phone', form)" required>
+                                <p v-if="errors.phone" class="text-danger fst-italic">{{ errors.phone }}</p>
                             </div>
                             <div class="mb-3">
                                 <select class="form-select" id="inputTopic" name="topic"
-                                    onclick="addIcon('inputTopic','helpTopic')" required>
+                                    v-model="form.topic" @change="validate('topic', form)" required>
                                     <option value="0" selected disabled>Topics</option>
                                     <option value="1">About FeastBox</option>
                                     <option value="2">Recipes and Ingredients</option>
                                     <option value="3">Subscription</option>
-                                    <option value="4">Delievery</option>
+                                    <option value="4">Delivery</option>
                                     <option value="5">Billing</option>
                                     <option value="6">Other</option>
                                 </select>
-                                <div><i class="bi icon" id="helpTopic"></i></div>
+                                <p v-if="errors.topic" class="text-danger fst-italic">{{ errors.topic }}</p>
                             </div>
                             <div class="mb-3">
                                 <textarea class="form-control" rows="4" placeholder="Message" id="inputMsg"
-                                    onchange="addIcon('inputMsg','helpMsg')" required></textarea>
-                                <div><i class="bi icon" id="helpMsg"></i></div>
+                                    v-model="form.message" @input="validate('message', form)" required></textarea>
+                                <p v-if="errors.message" class="text-danger fst-italic">{{ errors.message }}</p>
                             </div>
                             <div class="text-end">
                                 <button class="btn btn-custom2" type="submit">Send Message</button>
@@ -84,13 +84,38 @@
 
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
+import { useFormValidation } from '@/composables/useFormValidation'
+import { required, email, digits, notZero } from '@/composables/validators'
 
+const form = ref({
+  name: '',
+  email: '',
+  phone: '',
+  topic: '0',
+  message: ''
+})
+
+const { errors, validate, validateAll, isValid } = useFormValidation({
+  name: [required()],
+  email: [required(), email()],
+  phone: [required(), digits(10, 'Phone must be exactly 10 digits')],
+  topic: [notZero('Please select a topic')],
+  message: [required('Message is required')]
+})
+
+function handleSubmit() {
+  validateAll(form.value)
+  if (isValid.value) {
+    // Phase 2: send to API
+  }
+}
 </script>
 
 <style scoped>
 #contact-info{
-    
+
     margin-top: 100px;
 }
 
@@ -117,13 +142,6 @@
 
 #contact-info .btn-custom:hover{
     background-color: white;
-}
-
-.icon{
-    position: absolute;
-    text-align: end;
-    margin-top: -30px;
-    margin-left: 37%;
 }
 
 #help{
@@ -171,12 +189,13 @@
   background-color: #ffdb5a;
 }
 
+.text-danger{
+    font-size: 12px;
+    margin-bottom: 0px;
+}
+
 /*tablet */
 @media only screen and (max-width: 830px){
-    .icon{
-        margin-left: 35%;
-    }
-
     #inside-text-ad {
         width: 60%;
     }
@@ -194,10 +213,6 @@
 
 /*mobile */
 @media only screen and (max-width: 450px){
-    .icon{
-        margin-left: 59%;
-    }
-
     #inside-text-ad {
         width: 80%;
     }

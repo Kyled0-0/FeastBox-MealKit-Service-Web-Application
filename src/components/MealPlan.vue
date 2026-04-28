@@ -2,7 +2,7 @@
   <div class="container-fluid mt-4 p-0 text-center">
     <nav>
       <router-link to="/">
-        <img src="/src/assets/resources/img/logo1.png" width="100px" class="navbar-brand mb-3">
+        <img src="/src/assets/resources/img/logo1.png" width="100px" class="navbar-brand mb-3" alt="FeastBox logo">
       </router-link>
       
       <ol class="breadcrumb justify-content-center">
@@ -27,41 +27,20 @@
 
 
 <script setup>
-import { ref, watch } from 'vue';
+import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
-const steps = ref([
-  'Select a plan',
-  'Delivery details',
-  'Payment',
-  'Choose meals'
-]);
-const currentStep = ref(1);
+const steps = ['Select a plan', 'Delivery details', 'Payment'];
+const stepRoutes = { 1: 'planform', 2: 'deliveryform', 3: 'paymentform' };
 
 const router = useRouter();
 const route = useRoute();
 
-router.push('/planform');
+const currentStep = computed(() => route.meta.step ?? 1);
 
-watch(route, (newRoute) => {
-  if (newRoute.name === 'planform') {
-    currentStep.value = 1;
-  } else if (newRoute.name === 'deliveryform') {
-    currentStep.value = 2;
-  } else if (newRoute.name === 'paymentform') {
-    currentStep.value = 3;
-  }
-});
-
-function gotoStep(step){
-  currentStep.value = step;
-  if(step === 1){
-    router.push('/planform');
-  }else if (step === 2) {
-    router.push('/deliveryform');
-  } else if (step === 3) {
-    router.push('/paymentform');
-  }
+function gotoStep(step) {
+  const name = stepRoutes[step];
+  if (name) router.push({ name });
 }
 </script>
 

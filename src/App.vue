@@ -17,7 +17,7 @@
         <div class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1" id="navContent"
           aria-labelledby="navContentLabel">
           <div class="offcanvas-header">
-            <h5 class="offcanvas-title fs-2" id="navContentLabel"><span style="color: #ff603d;">feast</span>box</h5>
+            <h5 class="offcanvas-title fs-2" id="navContentLabel"><span class="text-brand">feast</span>box</h5>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
           </div>
 
@@ -62,7 +62,7 @@
           <div class="row">
             <!--logo-->
             <div class="col-lg-3 col-sm-12 logo">
-              <h3><span style="color: #ff603d;">feast</span>box</h3>
+              <h3><span class="text-brand">feast</span>box</h3>
             </div>
 
             <!--links-->

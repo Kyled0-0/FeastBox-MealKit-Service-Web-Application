@@ -2,22 +2,22 @@
     <!-- Login Form -->
     <div class="login-container bg-white">
         <h5 class="text-center mb-3">Login</h5>
-        <form>
+        <form @submit.prevent="handleSubmit">
             <div class="mb-3">
                 <label for="loginEmail" class="form-label mb-1">Email address</label>
                 <div class="input-group">
-                    <input type="email" class="form-control" id="loginEmail" onchange="email_change_validation()"
-                        required>
+                    <input type="email" class="form-control" id="loginEmail"
+                        v-model="form.email" @input="validate('email', form)" required>
                 </div>
-                <p id="helpEmail" class="mt-1"></p>
+                <p v-if="errors.email" class="text-danger fst-italic mt-1">{{ errors.email }}</p>
             </div>
             <div class="mb-3">
                 <label for="loginPassword" class="form-label mb-1">Password</label>
                 <div class="input-group">
                     <input type="password" class="form-control input-lg" id="loginPassword"
-                        onchange="password_change_validation()" required>
+                        v-model="form.password" @input="validate('password', form)" required>
                 </div>
-                <p id="helpPassword" class="mt-1"></p>
+                <p v-if="errors.password" class="text-danger fst-italic mt-1">{{ errors.password }}</p>
             </div>
             <div class="mb-3 text-end">
                 <a href="#" class="text-decoration-none">Forgot your password?</a>
@@ -31,8 +31,24 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
+import { useFormValidation } from '@/composables/useFormValidation'
+import { required, email } from '@/composables/validators'
 
+const form = ref({ email: '', password: '' })
+
+const { errors, validate, validateAll, isValid } = useFormValidation({
+  email: [required(), email()],
+  password: [required('Password is required')]
+})
+
+function handleSubmit() {
+  validateAll(form.value)
+  if (isValid.value) {
+    // Phase 2: call useAuth().login()
+  }
+}
 </script>
 
 <style scoped>
