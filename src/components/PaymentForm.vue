@@ -156,7 +156,7 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useMealForm } from '../stores/form'
 import { useFormValidation } from '@/composables/useFormValidation'
-import { required, digits, accepted } from '@/composables/validators'
+import { required, digits, accepted } from '@/utils/validators'
 import PaymentDemoBanner from '@/components/PaymentDemoBanner.vue'
 
 const MealForm = useMealForm()

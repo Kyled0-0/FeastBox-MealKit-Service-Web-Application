@@ -7,7 +7,7 @@ import './styles/tokens.css'
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
 import 'bootstrap-icons/font/bootstrap-icons.css'
-import "./assets/resources/css/style.css"
+import './styles/global.css'
 
 const app = createApp(App);
 app.use(createPinia());

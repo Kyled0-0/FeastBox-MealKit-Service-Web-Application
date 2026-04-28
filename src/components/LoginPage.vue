@@ -34,7 +34,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useFormValidation } from '@/composables/useFormValidation'
-import { required, email } from '@/composables/validators'
+import { required, email } from '@/utils/validators'
 
 const form = ref({ email: '', password: '' })
 

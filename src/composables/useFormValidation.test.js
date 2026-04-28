@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { useFormValidation } from './useFormValidation'
-import { required, email, digits, accepted } from './validators'
+import { required, email, digits, accepted } from '../utils/validators'
 
 describe('useFormValidation', () => {
   it('errors are null initially', () => {

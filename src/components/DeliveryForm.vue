@@ -102,7 +102,7 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useMealForm } from '../stores/form'
 import { useFormValidation } from '@/composables/useFormValidation'
-import { required, digits } from '@/composables/validators'
+import { required, digits } from '@/utils/validators'
 
 const MealForm = useMealForm()
 const { deliveryData } = storeToRefs(MealForm)
