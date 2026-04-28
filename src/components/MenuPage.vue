@@ -12,8 +12,8 @@
             <div class="input-group mt-4 search-bar">
               <input type="text" class="form-control" v-model="query" placeholder="Search">
               <div class="input-group-append">
-                <button class="btn btn-transparent" type="button">
-                  <i class="bi bi-search"></i>
+                <button class="btn btn-transparent" type="button" aria-label="Search">
+                  <i class="bi bi-search" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
@@ -71,7 +71,7 @@ const { page, totalPages, paginated, next, prev } = usePagination(results, 9)
 
 <style scoped>
 .highlight {
-  color: #4fcde9;
+  color: var(--color-brand-blue-highlight);
 }
 
 .container {
@@ -132,7 +132,7 @@ section {
   margin-bottom: 20px;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 991.98px) {
   .container {
     width: 100%;
   }

@@ -1,8 +1,12 @@
 :root {
   /* Brand colours */
   --color-brand-orange: #ff603d;
+  --color-brand-orange-tint: #fff8f6;
   --color-brand-blue: #70d4ea;
+  --color-brand-blue-highlight: #4fcde9;
+  --color-brand-blue-tint: #def9ff;
   --color-brand-yellow: #ffc907;
+  --color-brand-yellow-light: #ffdb5a;
 
   /* Spacing scale (0.25rem steps) */
   --space-1: 0.25rem;

@@ -20,13 +20,13 @@
                 <p v-if="errors.password" class="text-danger fst-italic mt-1">{{ errors.password }}</p>
             </div>
             <div class="mb-3 text-end">
-                <a href="#" class="text-decoration-none">Forgot your password?</a>
+                <span class="text-decoration-none text-muted" style="font-size:0.9rem;">Forgot your password?</span>
             </div>
             <button type="submit" class="btn btn-custom w-100 fw-semibold">Log in</button>
         </form>
 
         <div class="text-center mt-4">
-            <p>New to Feast Box? <a href="#" class="text-decoration-none">Sign Up Here</a></p>
+            <p>New to Feast Box? <span class="text-muted">Sign Up Here</span></p>
         </div>
     </div>
 </template>

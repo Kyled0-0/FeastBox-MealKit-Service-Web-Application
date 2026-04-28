@@ -120,7 +120,7 @@ function handleSubmit() {
 }
 
 #contact-info h3{
-    color: #FFC907;
+    color: var(--color-brand-yellow);
 }
 
 #contact-info input{
@@ -136,7 +136,7 @@ function handleSubmit() {
 }
 
 #contact-info .btn-custom{
-    background-color: #FFC907;
+    background-color: var(--color-brand-yellow);
     border-radius: 20px;
 }
 
@@ -151,9 +151,12 @@ function handleSubmit() {
     width: 250px;
 }
 
+#advertisment {
+    position: relative;
+}
+
 #ad-container {
     filter: brightness(85%);
-    position: relative;
     width: 100%;
     height: 500px;
     overflow: hidden;
@@ -167,8 +170,8 @@ function handleSubmit() {
 
 #inside-text-ad {
     position: absolute;
+    top: 50%;
     left: 50%;
-    margin-top: -255px;
     transform: translate(-50%, -50%);
     width: 40%;
     background-color: white;
@@ -176,17 +179,17 @@ function handleSubmit() {
 }
 
 #inside-text-ad h2 {
-    color: #ff603d;
+    color: var(--color-brand-orange);
 }
 
 .btn-custom2{
-  background-color: #FFC907;
+  background-color: var(--color-brand-yellow);
   border-radius: 30px;
   font-size: 17px;
 }
 
 .btn-custom2:hover{
-  background-color: #ffdb5a;
+  background-color: var(--color-brand-yellow-light);
 }
 
 .text-danger{
@@ -195,7 +198,7 @@ function handleSubmit() {
 }
 
 /*tablet */
-@media only screen and (max-width: 830px){
+@media only screen and (max-width: 991.98px){
     #inside-text-ad {
         width: 60%;
     }
@@ -212,7 +215,7 @@ function handleSubmit() {
 }
 
 /*mobile */
-@media only screen and (max-width: 450px){
+@media only screen and (max-width: 575.98px){
     #inside-text-ad {
         width: 80%;
     }

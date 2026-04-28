@@ -65,6 +65,7 @@
                         <img :src="step.stepImg" class="card-img-top" :alt="step.stepTitle">
                         <div class="card-body">
                             <p class="card-title">{{ step.stepTitle }}</p>
+                            <!-- Phase 2: sanitize stepText with DOMPurify server-side before rendering API content here -->
                             <p class="card-text" v-html="step.stepText"></p>
                             
                         </div>
@@ -740,7 +741,7 @@ section {
 .info-title {
     margin-left: 10px;
     font-size: 20px;
-    color: #ff603d;
+    color: var(--color-brand-orange);
 }
 
 .meal-container {
@@ -854,7 +855,7 @@ hr {
     font-weight: bold;
 }
 /*tablet*/
-@media only screen and (max-width: 830px) {
+@media only screen and (max-width: 991.98px) {
 
     .meal-container {
         width: 90vw;
@@ -881,7 +882,7 @@ hr {
 }
 
 /*mobile*/
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 575.98px) {
     .meal-container {
         width: 100vw;
         margin-left: -55px;

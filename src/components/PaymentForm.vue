@@ -4,6 +4,7 @@
             <h4><i class="bi bi-check-circle-fill" aria-hidden="true"></i>Purchase successfully</h4>
         </div>
         <div v-show="!successPayment">
+            <PaymentDemoBanner />
             <h2 class="text-center mb-4">Checkout and payment</h2>
         <div class="row">
             <!-- Payment method -->
@@ -40,8 +41,8 @@
                     </div>
                     <div class="mb-3">
                         <label for="cardNumber" class="form-label">Card number</label>
-                        <input type="text" class="form-control" id="cardNumber" v-model="paymentData.cardNumber"
-                            placeholder="1234 1234 1234 1234" @input="validate('cardNumber', paymentData)">
+                        <input type="text" class="form-control" id="cardNumber" inputmode="numeric" pattern="\d*" v-model="paymentData.cardNumber"
+                            placeholder="0000 0000 0000 0000 (demo)" @input="validate('cardNumber', paymentData)">
                         <p v-if="errors.cardNumber" class="text-danger fst-italic">{{ errors.cardNumber }}</p>
                     </div>
                     <div class="row">
@@ -53,7 +54,7 @@
                         </div>
                         <div class="col-md-6">
                             <label for="cvc" class="form-label">CVC Number</label>
-                            <input type="text" class="form-control" id="cvc" v-model="paymentData.cvc" placeholder="CVC"
+                            <input type="text" class="form-control" id="cvc" inputmode="numeric" pattern="\d*" v-model="paymentData.cvc" placeholder="000 (demo)"
                                 @input="validate('cvc', paymentData)">
                             <p v-if="errors.cvc" class="text-danger fst-italic">{{ errors.cvc }}</p>
                         </div>
@@ -156,6 +157,7 @@ import { useRouter } from 'vue-router'
 import { useMealForm } from '../stores/form'
 import { useFormValidation } from '@/composables/useFormValidation'
 import { required, digits, accepted } from '@/composables/validators'
+import PaymentDemoBanner from '@/components/PaymentDemoBanner.vue'
 
 const MealForm = useMealForm()
 const { paymentData, totalPriceVoucher, planData, deliveryData, successPayment, totalPrice } = storeToRefs(MealForm)
@@ -207,14 +209,13 @@ h5 {
 }
 
 .btn-custom2 {
-    background-color: #FFC907;
+    background-color: var(--color-brand-yellow);
     border-radius: 30px;
     font-size: 17px;
-
 }
 
 .btn-custom2:hover {
-    background-color: #ffdb5a;
+    background-color: var(--color-brand-yellow-light);
 }
 
 .text-danger {
@@ -222,7 +223,7 @@ h5 {
     margin-bottom: 0px;
 }
 
-@media only screen and (max-width: 830px) {
+@media only screen and (max-width: 991.98px) {
     #summary {
         margin-top: 50px;
     }

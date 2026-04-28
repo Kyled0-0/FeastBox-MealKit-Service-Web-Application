@@ -26,7 +26,7 @@
                     <div class="row mb-3">
                         <div class="col">
                             <label for="postcode" class="form-label">Postcode *</label>
-                            <input type="text" class="form-control" v-model="deliveryData.postcode" @input="validate('postcode', deliveryData)"  required>
+                            <input type="text" class="form-control" inputmode="numeric" pattern="\d*" v-model="deliveryData.postcode" @input="validate('postcode', deliveryData)" required>
                             <p v-if="errors.postcode" class="text-danger fst-italic">{{ errors.postcode }}</p>
                         </div>
                         <div class="col">
@@ -47,7 +47,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="phone" class="form-label">Phone number *</label>
-                        <input type="tel" class="form-control" v-model="deliveryData.phone" @input="validate('phone', deliveryData)"  required>
+                        <input type="tel" class="form-control" inputmode="numeric" pattern="\d*" v-model="deliveryData.phone" @input="validate('phone', deliveryData)" required>
                         <p v-if="errors.phone" class="text-danger fst-italic">{{ errors.phone }}</p>
                     </div>
                     <div class="mb-3">
@@ -175,25 +175,25 @@ h5 {
 }
 
 .btn-custom-plan:hover {
-    background-color: #def9ff;
+    background-color: var(--color-brand-blue-tint);
     border: 1px solid rgb(220, 220, 220);
 }
 
 /* Radio button checked styling */
 input[type="radio"]:checked+label {
-    background-color: #def9ff;
+    background-color: var(--color-brand-blue-tint);
     color: black;
-    border: 2px solid #70d4ea;
+    border: 2px solid var(--color-brand-blue);
 }
 
 .btn-custom2 {
-    background-color: #FFC907;
+    background-color: var(--color-brand-yellow);
     border-radius: 30px;
     font-size: 17px;
 }
 
 .btn-custom2:hover {
-    background-color: #ffdb5a;
+    background-color: var(--color-brand-yellow-light);
 }
 
 .text-danger{
@@ -201,7 +201,7 @@ input[type="radio"]:checked+label {
     margin-bottom: 0px;
 }
 
-@media only screen and (max-width: 830px){
+@media only screen and (max-width: 991.98px){
   #deliveryTime{
     margin-top: 30px;
   }

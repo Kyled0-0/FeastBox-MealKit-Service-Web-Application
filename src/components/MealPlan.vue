@@ -85,7 +85,7 @@ function gotoStep(step) {
 
 .breadcrumb-item.active .step-circle,
 .breadcrumb-item.completed .step-circle {
-  background-color: #70d4ea;
+  background-color: var(--color-brand-blue);
   color: #fff;
 }
 
@@ -96,7 +96,7 @@ function gotoStep(step) {
 }
 
 #promo {
-  background-color: #70d4ea;
+  background-color: var(--color-brand-blue);
   font-size: 13px;
 }
 
@@ -104,7 +104,7 @@ function gotoStep(step) {
   width: 60%;
 }
 
-@media only screen and (max-width: 830px){
+@media only screen and (max-width: 991.98px){
   .container{
   width: 100%;
   }

@@ -151,13 +151,13 @@ const featuredMeals = [
 
 
 
-#advertisment{
-    margin-bottom: 0px;
+#advertisment {
+    margin-bottom: 0;
+    position: relative;
 }
 
 #ad-container {
     filter: brightness(85%);
-    position: relative;
     width: 100%;
     height: 500px;
     overflow: hidden;
@@ -171,8 +171,8 @@ const featuredMeals = [
 
 #inside-text-ad {
     position: absolute;
+    top: 50%;
     left: 50%;
-    margin-top: -255px;
     transform: translate(-50%, -50%);
     width: 40%;
     background-color: white;
@@ -180,10 +180,10 @@ const featuredMeals = [
 }
 
 #inside-text-ad h2 {
-    color: #ff603d;
+    color: var(--color-brand-orange);
 }
 /*tablet*/
-@media only screen and (max-width: 830px) {
+@media only screen and (max-width: 991.98px) {
     #inside-text-bg {
         width: 80%;
     }
@@ -198,7 +198,7 @@ const featuredMeals = [
 }
 
 /*mobile*/
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 575.98px) {
     #inside-text-bg {
         width: 80%;
     }

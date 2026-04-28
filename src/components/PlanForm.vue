@@ -149,7 +149,7 @@ function switchStep() {
 }
 
 .btn-custom-plan:hover {
-    background-color: #def9ff;
+    background-color: var(--color-brand-blue-tint);
     border: 1px solid rgb(220, 220, 220);
 }
 
@@ -166,9 +166,9 @@ function switchStep() {
 
 /*target checked radio*/
 input[type="radio"]:checked+label {
-    background-color: #def9ff;
+    background-color: var(--color-brand-blue-tint);
     color: black;
-    border: 2px solid #70d4ea;
+    border: 2px solid var(--color-brand-blue);
 }
 
 #meal-kind label {
@@ -188,13 +188,12 @@ input[type="radio"]:checked+label {
 }
 
 .btn-custom2 {
-    background-color: #FFC907;
+    background-color: var(--color-brand-yellow);
     border-radius: 30px;
     font-size: 17px;
-
 }
 
 .btn-custom2:hover {
-    background-color: #ffdb5a;
+    background-color: var(--color-brand-yellow-light);
 }
 </style>

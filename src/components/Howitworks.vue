@@ -6,25 +6,27 @@
                 <div id="carousel_img" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
                     <div class="carousel-inner">
                         <div class="carousel-item">
-                            <img src="/src/assets/resources/img/carousel-img1.jpg" class="d-block w-100" alt="...">
+                            <img src="/src/assets/resources/img/carousel-img1.jpg" class="d-block w-100" alt="">
                         </div>
                         <div class="carousel-item active">
-                            <img src="/src/assets/resources/img/carousel-img2.jpg" class="d-block w-100" alt="...">
+                            <img src="/src/assets/resources/img/carousel-img2.jpg" class="d-block w-100" alt="">
                         </div>
                         <div class="carousel-item">
-                            <img src="/src/assets/resources/img/carousel-img3.jpg" class="d-block w-100" alt="...">
+                            <img src="/src/assets/resources/img/carousel-img3.jpg" class="d-block w-100" alt="">
                         </div>
                         <div class="carousel-item">
-                            <img src="/src/assets/resources/img/carousel-img4.jpg" class="d-block w-100" alt="...">
+                            <img src="/src/assets/resources/img/carousel-img4.jpg" class="d-block w-100" alt="">
                         </div>
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel_img"
-                        data-bs-slide="prev">
-                        <span class="visually-hidden">Previous</span>
+                        data-bs-slide="prev" aria-label="Previous slide">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous slide</span>
                     </button>
                     <button class="carousel-control-next" type="button" data-bs-target="#carousel_img"
-                        data-bs-slide="next">
-                        <span class="visually-hidden">Next</span>
+                        data-bs-slide="next" aria-label="Next slide">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next slide</span>
                     </button>
                 </div>
             </div>
@@ -187,7 +189,7 @@ section {
 }
 
 .highlight {
-    color: #70d4ea;
+    color: var(--color-brand-blue);
     font-weight: bold;
 }
 
@@ -236,11 +238,11 @@ section {
 
 #advertisment{
     margin-bottom: 0px;
+    position: relative;
 }
 
 #ad-container {
     filter: brightness(85%);
-    position: relative;
     width: 100%;
     height: 500px;
     overflow: hidden;
@@ -254,8 +256,8 @@ section {
 
 #inside-text-ad {
     position: absolute;
+    top: 50%;
     left: 50%;
-    margin-top: -255px;
     transform: translate(-50%, -50%);
     width: 40%;
     background-color: white;
@@ -263,10 +265,10 @@ section {
 }
 
 #inside-text-ad h2 {
-    color: #ff603d;
+    color: var(--color-brand-orange);
 }
 /*tablet*/
-@media only screen and (max-width: 830px) {
+@media only screen and (max-width: 991.98px) {
 
     #inside-text-ad {
         width: 60%;
@@ -289,7 +291,7 @@ section {
 }
 
 /*mobile*/
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 575.98px) {
     #how-it-works-section {
     width: 100%;
     }   
