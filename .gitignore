@@ -12,6 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Project docs and AI tooling — never commit to remote
+CLAUDE.md
+docs_foundation/
+docs/superpowers/
+Plan_ORG/
+.claude/
+.mcp.json
+*.pkl
+feastbox-source-dump.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
