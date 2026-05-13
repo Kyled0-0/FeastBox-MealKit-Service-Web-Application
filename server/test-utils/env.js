@@ -5,4 +5,4 @@ process.env.JWT_REFRESH_SECRET = 'test_refresh_secret_that_is_at_least_32_chars_
 process.env.CLIENT_URL = 'http://localhost:5173'
 process.env.PORT = '3001'
 process.env.NODE_ENV = 'test'
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+process.env.DATABASE_URL = 'postgresql://test:test@localhost:5433/test'
