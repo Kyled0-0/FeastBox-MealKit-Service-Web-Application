@@ -110,7 +110,7 @@
               <a href="mailto:info@feastbox.com" class="lead">info@feastbox.com</a>
             </div>
             <div class="col-lg-6 d-flex justify-content-end">
-              <p class="mb-0">&copy; Copyright 2024 FeastBox</p>
+              <p class="mb-0">&copy; Copyright 2025 FeastBox</p>
             </div>
           </div>
         </div>
