@@ -65,49 +65,10 @@
 
         <section id="meals-view" class="content-section text-center">
             <div>
-                <h2 class="fw-bold" style="color:#ff603d; margin-bottom:-10px;">CHOOSE FROM</h2>
-                <p class="fw-semibold" style="font-size: 35px;">50+ meal options</p>
+                <h2 class="fw-bold text-brand choose-label">CHOOSE FROM</h2>
+                <p class="fw-semibold choose-count">50+ meal options</p>
             </div>
-            <div class="scrollable-image">
-                <div class="meal">
-                    <img src="/src/assets/resources/img/cheese-ravioli.jpeg" class="img-fluid">
-                    <div class="meal-text fw-bold">Four Cheese Raviolo<br>with Eggplant Sauce</div>
-                </div>
-                <div class="meal">
-                    <img src="/src/assets/resources/img/philly-cheesesteak.jpeg" class="img-fluid">
-                    <div class="meal-text fw-bold">Philly Cheese Steak with Roast<br>Sweet Potato Fries and Salad
-                    </div>
-                </div>
-                <div class="meal">
-                    <img src="/src/assets/resources/img/prawn-rump-steak.jpeg" class="img-fluid">
-                    <div class="meal-text fw-bold">Prawn and Rump Steak Surf 'n' Turf<br>with Pepper Garlic Sauce
-                    </div>
-                </div>
-                <div class="meal">
-                    <img src="/src/assets/resources/img/roast-lamb-tacos.jpeg" class="img-fluid">
-                    <div class="meal-text fw-bold">Mojo Verde Roast Lamb Tacos</div>
-                </div>
-                <div class="meal">
-                    <img src="/src/assets/resources/img/shephard-pie.jpeg" class="img-fluid">
-                    <div class="meal-text fw-bold">Lamb Shepherd's Pie with<br>Sweet Potato Mash</div>
-                </div>
-                <div class="meal">
-                    <img src="/src/assets/resources/img/smoked-salmon-salad.jpeg" class="img-fluid">
-                    <div class="meal-text fw-bold">Smoked Salmon Salad with<br>Yoghurt Dressing</div>
-                </div>
-                <div class="meal">
-                    <img src="/src/assets/resources/img/spicy-lamb-rice.jpeg" class="img-fluid">
-                    <div class="meal-text fw-bold">Spicy Lamb Rice with<br>Oyster Sauce and Choy Sum</div>
-                </div>
-                <div class="meal">
-                    <img src="/src/assets/resources/img/steak-asada.jpeg" class="img-fluid">
-                    <div class="meal-text fw-bold">Steak Carne Asada with<br>Salad and Tortillas</div>
-                </div>
-                <div class="meal">
-                    <img src="/src/assets/resources/img/sweet-chili-pork-noodles.jpeg" class="img-fluid">
-                    <div class="meal-text fw-bold">Sweet Chili Pork Noodles</div>
-                </div>
-            </div>
+            <MealStrip :meals="featuredMeals" />
                 <router-link class="btn btn-custom fw-semibold p-3 mt-3" to="/menu">Browse Our
                     Menu</router-link>
         </section>
@@ -122,15 +83,36 @@
                     fresh, pre-portioned ingredients and easy-to-follow recipes, making gourmet cooking simple and fun.
                 </p>
                 <router-link to="/meal-plan"  class="btn btn-custom fw-bold p-2 mt-3">Get 20% Off</router-link>
-                <p class="lead" style="font-size: 14px;">Get 20% off your first box with code <span class="fw-semibold">FEAST20</span>. Start
+                <p class="lead promo-text">Get 20% off your first box with code <span class="fw-semibold">FEAST20</span>. Start
                     your culinary adventure today!</p>
             </div>
         </section>
     </div>
 </template>
 
-<script>
+<script setup>
+import MealStrip from '@/components/MealStrip.vue'
+import cheeseRavioli from '/src/assets/resources/img/cheese-ravioli.jpeg'
+import phillyCheesesteak from '/src/assets/resources/img/philly-cheesesteak.jpeg'
+import prawnRumpSteak from '/src/assets/resources/img/prawn-rump-steak.jpeg'
+import roastLambTacos from '/src/assets/resources/img/roast-lamb-tacos.jpeg'
+import shepherdPie from '/src/assets/resources/img/shephard-pie.jpeg'
+import smokedSalmonSalad from '/src/assets/resources/img/smoked-salmon-salad.jpeg'
+import spicyLambRice from '/src/assets/resources/img/spicy-lamb-rice.jpeg'
+import steakAsada from '/src/assets/resources/img/steak-asada.jpeg'
+import sweetChiliPorkNoodles from '/src/assets/resources/img/sweet-chili-pork-noodles.jpeg'
 
+const featuredMeals = [
+  { id: 'h01', image: cheeseRavioli, title: 'Four Cheese Raviolo with Eggplant Sauce' },
+  { id: 'h02', image: phillyCheesesteak, title: 'Philly Cheese Steak with Roast Sweet Potato Fries and Salad' },
+  { id: 'h03', image: prawnRumpSteak, title: "Prawn and Rump Steak Surf 'n' Turf with Pepper Garlic Sauce" },
+  { id: 'h04', image: roastLambTacos, title: 'Mojo Verde Roast Lamb Tacos' },
+  { id: 'h05', image: shepherdPie, title: "Lamb Shepherd's Pie with Sweet Potato Mash" },
+  { id: 'h06', image: smokedSalmonSalad, title: 'Smoked Salmon Salad with Yoghurt Dressing' },
+  { id: 'h07', image: spicyLambRice, title: 'Spicy Lamb Rice with Oyster Sauce and Choy Sum' },
+  { id: 'h08', image: steakAsada, title: 'Steak Carne Asada with Salad and Tortillas' },
+  { id: 'h09', image: sweetChiliPorkNoodles, title: 'Sweet Chili Pork Noodles' },
+]
 </script>
 
 <style scoped>
@@ -139,7 +121,7 @@
 }
 
 #introbg-container {
-    scale: 1.02;
+    transform: scale(1.02);
     filter: brightness(70%);
     position: relative;
     width: 100%;
@@ -168,44 +150,14 @@
 }
 
 
-.scrollable-image {
-    overflow-x: auto;
-    white-space: nowrap;
-}
 
-.meal {
-    display: inline-block;
-    width: 325px;
-    height: 300px;
+#advertisment {
+    margin-bottom: 0;
     position: relative;
-    overflow: hidden;
-    margin-right: 4px;
-}
-
-.meal img {
-    margin-top: 40px;
-    scale: 1.4;
-}
-
-.meal-text {
-    position: absolute;
-    height: 100px;
-    width: 100%;
-    bottom: 0;
-    padding-top: 20px;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    text-align: center;
-    font-size: 17px;
-}
-
-#advertisment{
-    margin-bottom: 0px;
 }
 
 #ad-container {
     filter: brightness(85%);
-    position: relative;
     width: 100%;
     height: 500px;
     overflow: hidden;
@@ -219,8 +171,8 @@
 
 #inside-text-ad {
     position: absolute;
+    top: 50%;
     left: 50%;
-    margin-top: -255px;
     transform: translate(-50%, -50%);
     width: 40%;
     background-color: white;
@@ -228,10 +180,18 @@
 }
 
 #inside-text-ad h2 {
-    color: #ff603d;
+    color: var(--color-brand-orange);
+}
+
+.choose-label {
+    margin-bottom: -10px;
+}
+
+.choose-count {
+    font-size: 35px;
 }
 /*tablet*/
-@media only screen and (max-width: 830px) {
+@media only screen and (max-width: 991.98px) {
     #inside-text-bg {
         width: 80%;
     }
@@ -246,7 +206,7 @@
 }
 
 /*mobile*/
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 575.98px) {
     #inside-text-bg {
         width: 80%;
     }

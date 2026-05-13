@@ -1,43 +1,43 @@
 <template>
     <div class="container-fluid px-0" id="contact-info">
-        <div class="container" style="width: 70%;">
+        <div class="container contact-inner">
             <div class="row">
                 <div class="col-md-7 contact-form">
                     <div class="py-4">
                         <h3>Contact Form</h3>
-                        <form>
+                        <form @submit.prevent="handleSubmit">
                             <div class="mb-3">
                                 <input type="text" class="form-control" id="inputName" placeholder="Name"
-                                    onchange="addIcon('inputName','helpName')" required>
-                                <div><i class="bi icon" id="helpName"></i></div>
+                                    v-model="form.name" @input="validate('name', form)" required>
+                                <p v-if="errors.name" class="text-danger fst-italic">{{ errors.name }}</p>
                             </div>
                             <div class="mb-3">
                                 <input type="email" class="form-control" id="inputEmail" placeholder="Email Address"
-                                    onchange="addIcon('inputEmail','helpEmail')" required>
-                                <div><i class="bi icon" id="helpEmail"></i></div>
+                                    v-model="form.email" @input="validate('email', form)" required>
+                                <p v-if="errors.email" class="text-danger fst-italic">{{ errors.email }}</p>
                             </div>
                             <div class="mb-3">
                                 <input type="text" class="form-control" id="inputPhone" placeholder="Phone Number"
-                                    onchange="addIcon('inputPhone','helpPhone')" required>
-                                <div><i class="bi icon" id="helpPhone"></i></div>
+                                    v-model="form.phone" @input="validate('phone', form)" required>
+                                <p v-if="errors.phone" class="text-danger fst-italic">{{ errors.phone }}</p>
                             </div>
                             <div class="mb-3">
                                 <select class="form-select" id="inputTopic" name="topic"
-                                    onclick="addIcon('inputTopic','helpTopic')" required>
+                                    v-model="form.topic" @change="validate('topic', form)" required>
                                     <option value="0" selected disabled>Topics</option>
                                     <option value="1">About FeastBox</option>
                                     <option value="2">Recipes and Ingredients</option>
                                     <option value="3">Subscription</option>
-                                    <option value="4">Delievery</option>
+                                    <option value="4">Delivery</option>
                                     <option value="5">Billing</option>
                                     <option value="6">Other</option>
                                 </select>
-                                <div><i class="bi icon" id="helpTopic"></i></div>
+                                <p v-if="errors.topic" class="text-danger fst-italic">{{ errors.topic }}</p>
                             </div>
                             <div class="mb-3">
                                 <textarea class="form-control" rows="4" placeholder="Message" id="inputMsg"
-                                    onchange="addIcon('inputMsg','helpMsg')" required></textarea>
-                                <div><i class="bi icon" id="helpMsg"></i></div>
+                                    v-model="form.message" @input="validate('message', form)" required></textarea>
+                                <p v-if="errors.message" class="text-danger fst-italic">{{ errors.message }}</p>
                             </div>
                             <div class="text-end">
                                 <button class="btn btn-custom2" type="submit">Send Message</button>
@@ -76,7 +76,7 @@
                     fresh, pre-portioned ingredients and easy-to-follow recipes, making gourmet cooking simple and fun.
                 </p>
                 <router-link to="/meal-plan"  class="btn btn-custom fw-bold p-2 mt-3">Get 20% Off</router-link>
-                <p class="lead" style="font-size: 14px;">Get 20% off your first box with code <span class="fw-semibold">FEAST20</span>. Start
+                <p class="lead promo-text">Get 20% off your first box with code <span class="fw-semibold">FEAST20</span>. Start
                     your culinary adventure today!</p>
             </div>
         </section>
@@ -84,18 +84,47 @@
 
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
+import { useFormValidation } from '@/composables/useFormValidation'
+import { required, email, digits, notZero } from '@/utils/validators'
 
+const form = ref({
+  name: '',
+  email: '',
+  phone: '',
+  topic: '0',
+  message: ''
+})
+
+const { errors, validate, validateAll, isValid } = useFormValidation({
+  name: [required()],
+  email: [required(), email()],
+  phone: [required(), digits(10, 'Phone must be exactly 10 digits')],
+  topic: [notZero('Please select a topic')],
+  message: [required('Message is required')]
+})
+
+function handleSubmit() {
+  validateAll(form.value)
+  if (isValid.value) {
+    // Phase 2: send to API
+  }
+}
 </script>
 
 <style scoped>
+.contact-inner {
+    width: 70%;
+}
+
 #contact-info{
-    
+
     margin-top: 100px;
 }
 
 #contact-info h3{
-    color: #FFC907;
+    color: var(--color-brand-yellow);
 }
 
 #contact-info input{
@@ -111,19 +140,12 @@
 }
 
 #contact-info .btn-custom{
-    background-color: #FFC907;
+    background-color: var(--color-brand-yellow);
     border-radius: 20px;
 }
 
 #contact-info .btn-custom:hover{
     background-color: white;
-}
-
-.icon{
-    position: absolute;
-    text-align: end;
-    margin-top: -30px;
-    margin-left: 37%;
 }
 
 #help{
@@ -133,9 +155,12 @@
     width: 250px;
 }
 
+#advertisment {
+    position: relative;
+}
+
 #ad-container {
     filter: brightness(85%);
-    position: relative;
     width: 100%;
     height: 500px;
     overflow: hidden;
@@ -149,8 +174,8 @@
 
 #inside-text-ad {
     position: absolute;
+    top: 50%;
     left: 50%;
-    margin-top: -255px;
     transform: translate(-50%, -50%);
     width: 40%;
     background-color: white;
@@ -158,25 +183,26 @@
 }
 
 #inside-text-ad h2 {
-    color: #ff603d;
+    color: var(--color-brand-orange);
 }
 
 .btn-custom2{
-  background-color: #FFC907;
+  background-color: var(--color-brand-yellow);
   border-radius: 30px;
   font-size: 17px;
 }
 
 .btn-custom2:hover{
-  background-color: #ffdb5a;
+  background-color: var(--color-brand-yellow-light);
+}
+
+.text-danger{
+    font-size: 12px;
+    margin-bottom: 0px;
 }
 
 /*tablet */
-@media only screen and (max-width: 830px){
-    .icon{
-        margin-left: 35%;
-    }
-
+@media only screen and (max-width: 991.98px){
     #inside-text-ad {
         width: 60%;
     }
@@ -193,11 +219,7 @@
 }
 
 /*mobile */
-@media only screen and (max-width: 450px){
-    .icon{
-        margin-left: 59%;
-    }
-
+@media only screen and (max-width: 575.98px){
     #inside-text-ad {
         width: 80%;
     }

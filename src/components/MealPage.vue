@@ -1,5 +1,5 @@
 <template>
-    <div class="container" style="width: 80%;" v-if="meal_display">
+    <div class="container meal-wrapper" v-if="meal_display">
         <section id="description">
             <div class="row">
                 <div class="col-lg-6 col-md-12 container">
@@ -65,6 +65,7 @@
                         <img :src="step.stepImg" class="card-img-top" :alt="step.stepTitle">
                         <div class="card-body">
                             <p class="card-title">{{ step.stepTitle }}</p>
+                            <!-- Phase 2: sanitize stepText with DOMPurify server-side before rendering API content here -->
                             <p class="card-text" v-html="step.stepText"></p>
                             
                         </div>
@@ -78,7 +79,7 @@
 </template>
 
 <script setup>
-import { defineProps, computed } from 'vue';
+import { computed } from 'vue'
 
 function getImage(name)
 {
@@ -733,6 +734,10 @@ const meal_display = computed(() => {
 </script>
 
 <style scoped>
+.meal-wrapper {
+    width: 80%;
+}
+
 section {
     margin-top: 70px;
 }
@@ -740,7 +745,7 @@ section {
 .info-title {
     margin-left: 10px;
     font-size: 20px;
-    color: #ff603d;
+    color: var(--color-brand-orange);
 }
 
 .meal-container {
@@ -850,11 +855,11 @@ hr {
     font-weight: bold;
 }
 
-::v-deep .card-text span {
+:deep(.card-text span) {
     font-weight: bold;
 }
 /*tablet*/
-@media only screen and (max-width: 830px) {
+@media only screen and (max-width: 991.98px) {
 
     .meal-container {
         width: 90vw;
@@ -881,7 +886,7 @@ hr {
 }
 
 /*mobile*/
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 575.98px) {
     .meal-container {
         width: 100vw;
         margin-left: -55px;

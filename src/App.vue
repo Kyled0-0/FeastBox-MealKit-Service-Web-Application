@@ -11,18 +11,18 @@
           <img src="/src/assets/resources/img/logo3.png" width="80px" class="navbar-brand" id="logo-nav">
         </router-link>
         <div id="collapse-logo">
-          <router-link to="/"><img src="/src/assets/resources/img/logo1.png" width="80px" style="display: none;"
-              id="collapse-logo" class="navbar-brand"></router-link>
+          <router-link to="/"><img src="/src/assets/resources/img/logo1.png" width="80px"
+              id="collapse-logo" class="navbar-brand d-none"></router-link>
         </div>
         <div class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1" id="navContent"
           aria-labelledby="navContentLabel">
           <div class="offcanvas-header">
-            <h5 class="offcanvas-title fs-2" id="navContentLabel"><span style="color: #ff603d;">feast</span>box</h5>
+            <h5 class="offcanvas-title fs-2" id="navContentLabel"><span class="text-brand">feast</span>box</h5>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
           </div>
 
           <div class="offcanvas-body">
-            <div style="display: none;" id="offCanvasButton">
+            <div class="d-none" id="offCanvasButton">
               <p>Already a member? <router-link to="/login" id="login-offcanvas">Login</router-link></p>
               <router-link class="btn btn-custom fw-semibold" to="/meal-plan">Choose Meal Plan</router-link>
               <hr>
@@ -39,7 +39,7 @@
               </li>
             </ul>
             <div class="d-flex" id="navButton">
-              <router-link class="btn" to="/login" style="border: none;">Login</router-link>
+              <router-link class="btn border-0" to="/login">Login</router-link>
               <router-link class="btn btn-custom fw-semibold" to="/meal-plan">Choose Meal Plan</router-link>
             </div>
           </div>
@@ -49,7 +49,7 @@
       </div>
     </nav>
 
-    <div style="flex-grow: 1;">
+    <div class="flex-grow-1">
       <router-view></router-view>
     </div>
 
@@ -62,7 +62,7 @@
           <div class="row">
             <!--logo-->
             <div class="col-lg-3 col-sm-12 logo">
-              <h3><span style="color: #ff603d;">feast</span>box</h3>
+              <h3><span class="text-brand">feast</span>box</h3>
             </div>
 
             <!--links-->
@@ -70,14 +70,14 @@
             <div class="col-lg-6 col-md-8 d-flex flex-wrap links">
               <div class="col-6">
                 <router-link class="lead" to="/how">How it works</router-link><br>
-                <a href="#" class="lead">Why FeastBox</a><br>
-                <a href="#" class="lead">FAQs</a><br>
-                <a href="#" class="lead">Blog</a><br>
+                <span class="lead footer-link-placeholder">Why FeastBox</span><br>
+                <span class="lead footer-link-placeholder">FAQs</span><br>
+                <span class="lead footer-link-placeholder">Blog</span><br>
               </div>
               <div class="col-3">
                 <router-link class="lead" to="/contact">Contact Us</router-link><br>
-                <a href="#" class="lead">Partnerships</a><br>
-                <a href="#" class="lead">Affiliate Program</a><br>
+                <span class="lead footer-link-placeholder">Partnerships</span><br>
+                <span class="lead footer-link-placeholder">Affiliate Program</span><br>
               </div>
             </div>
 
@@ -86,16 +86,16 @@
             <!--app and social-->
             <div class="col-lg-3 col-md-4">
               <div class="download_buttons">
-                <a href="#"><img src="./assets/resources/img/appstore.png" class="mb-3" width="100px"></a>
-                <a href="#"><img src="./assets/resources/img/ggplay.png" width="100px"></a>
+                <span class="d-block mb-3"><img src="./assets/resources/img/appstore.png" width="100px" alt="Download on the App Store"></span>
+                <span><img src="./assets/resources/img/ggplay.png" width="100px" alt="Get it on Google Play"></span>
               </div>
               <div>
-                <p class="lead" style="margin-bottom: 0px;">Follow us</p>
+                <p class="lead mb-0">Follow us</p>
                 <div id="social-icons-div">
-                  <a href="#" class="social-icons"><i class="bi bi-linkedin"></i></a>
-                  <a href="#" class="social-icons"><i class="bi bi-facebook"></i></a>
-                  <a href="#" class="social-icons"><i class="bi bi-instagram"></i></a>
-                  <a href="#" class="social-icons"><i class="bi bi-twitter"></i></a>
+                  <span class="social-icons" aria-label="LinkedIn"><i class="bi bi-linkedin" aria-hidden="true"></i></span>
+                  <span class="social-icons" aria-label="Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></span>
+                  <span class="social-icons" aria-label="Instagram"><i class="bi bi-instagram" aria-hidden="true"></i></span>
+                  <span class="social-icons" aria-label="Twitter"><i class="bi bi-twitter" aria-hidden="true"></i></span>
                 </div>
 
               </div>
@@ -105,12 +105,12 @@
 
           <div class="row" id="footer-bottom">
             <div class="col-lg-6">
-              <a href="#" class="lead">Terms & Conditions</a>
-              <a href="#" class="lead">Privacy Policy</a>
-              <a href="#" class="lead">info@feastbox.com</a>
+              <span class="lead footer-link-placeholder">Terms &amp; Conditions</span>
+              <span class="lead footer-link-placeholder">Privacy Policy</span>
+              <a href="mailto:info@feastbox.com" class="lead">info@feastbox.com</a>
             </div>
             <div class="col-lg-6 d-flex justify-content-end">
-              <p class="mb-0">&copy; Copyright 2024 FeastBox</p>
+              <p class="mb-0">&copy; Copyright 2025 FeastBox</p>
             </div>
           </div>
         </div>
@@ -128,4 +128,9 @@ const route = useRoute();
 
 </script>
 
-<style></style>
+<style>
+.footer-link-placeholder {
+  color: inherit;
+  cursor: default;
+}
+</style>

@@ -3,28 +3,30 @@
     <div class="container-bg">
         <div class="row align-items-center">
             <div class="col-lg-6 order-lg-2">
-                <div id="carousel_img" class="carousel slide carousel-fade" data-bs-ride="carousel" data-interval="5000">
+                <div id="carousel_img" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
                     <div class="carousel-inner">
                         <div class="carousel-item">
-                            <img src="/src/assets/resources/img/carousel-img1.jpg" class="d-block w-100" alt="...">
+                            <img src="/src/assets/resources/img/carousel-img1.jpg" class="d-block w-100" alt="">
                         </div>
                         <div class="carousel-item active">
-                            <img src="/src/assets/resources/img/carousel-img2.jpg" class="d-block w-100" alt="...">
+                            <img src="/src/assets/resources/img/carousel-img2.jpg" class="d-block w-100" alt="">
                         </div>
                         <div class="carousel-item">
-                            <img src="/src/assets/resources/img/carousel-img3.jpg" class="d-block w-100" alt="...">
+                            <img src="/src/assets/resources/img/carousel-img3.jpg" class="d-block w-100" alt="">
                         </div>
                         <div class="carousel-item">
-                            <img src="/src/assets/resources/img/carousel-img4.jpg" class="d-block w-100" alt="...">
+                            <img src="/src/assets/resources/img/carousel-img4.jpg" class="d-block w-100" alt="">
                         </div>
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel_img"
-                        data-bs-slide="prev">
-                        <span class="visually-hidden">Previous</span>
+                        data-bs-slide="prev" aria-label="Previous slide">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous slide</span>
                     </button>
                     <button class="carousel-control-next" type="button" data-bs-target="#carousel_img"
-                        data-bs-slide="next">
-                        <span class="visually-hidden">Next</span>
+                        data-bs-slide="next" aria-label="Next slide">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next slide</span>
                     </button>
                 </div>
             </div>
@@ -41,7 +43,7 @@
 
 
     <section class="container mt-5" id="how-it-works-section">
-        <h2 class="text-center mb-5">How <span style="color:#ff603d">Feastbox</span> Meal Kit Delivery Works</h2>
+        <h2 class="text-center mb-5">How <span class="text-brand">Feastbox</span> Meal Kit Delivery Works</h2>
         <div class="row align-items-center mb-5">
             <div class="col-lg-6 px-5">
                 <h2>01 | Choose your meals</h2>
@@ -105,7 +107,7 @@
 
                     <div class="card-body text-center">
                         <h5 class="card-title">Classic Comforts</h5>
-                        <p class="card-text lead">Timeless dishes that bring warmth and familiraity</p>
+                        <p class="card-text lead">Timeless dishes that bring warmth and familiarity</p>
                     </div>
                 </div>
             </div>
@@ -132,7 +134,7 @@
                     </div>
 
                     <div class="card-body text-center">
-                        <h5 class="card-title">Vegetartian Delight</h5>
+                        <h5 class="card-title">Vegetarian Delight</h5>
                         <p class="card-text lead">Fresh, wholesome, and full of flavor, these plant-based meals showcase
                             the best of seasonal produce
                         </p>
@@ -152,7 +154,7 @@
                     fresh, pre-portioned ingredients and easy-to-follow recipes, making gourmet cooking simple and fun.
                 </p>
                 <router-link to="/meal-plan"  class="btn btn-custom fw-bold p-2 mt-3">Get 20% Off</router-link>
-                <p class="lead" style="font-size: 14px;">Get 20% off your first box with code <span class="fw-semibold">FEAST20</span>. Start
+                <p class="lead promo-text">Get 20% off your first box with code <span class="fw-semibold">FEAST20</span>. Start
                     your culinary adventure today!</p>
             </div>
     </section>
@@ -187,7 +189,7 @@ section {
 }
 
 .highlight {
-    color: #70d4ea;
+    color: var(--color-brand-blue);
     font-weight: bold;
 }
 
@@ -227,7 +229,7 @@ section {
 }
 
 #variety img{
-    scale: 1.35;
+    transform: scale(1.35);
 }
 
 #vegetarian img{
@@ -236,11 +238,11 @@ section {
 
 #advertisment{
     margin-bottom: 0px;
+    position: relative;
 }
 
 #ad-container {
     filter: brightness(85%);
-    position: relative;
     width: 100%;
     height: 500px;
     overflow: hidden;
@@ -254,8 +256,8 @@ section {
 
 #inside-text-ad {
     position: absolute;
+    top: 50%;
     left: 50%;
-    margin-top: -255px;
     transform: translate(-50%, -50%);
     width: 40%;
     background-color: white;
@@ -263,10 +265,10 @@ section {
 }
 
 #inside-text-ad h2 {
-    color: #ff603d;
+    color: var(--color-brand-orange);
 }
 /*tablet*/
-@media only screen and (max-width: 830px) {
+@media only screen and (max-width: 991.98px) {
 
     #inside-text-ad {
         width: 60%;
@@ -289,7 +291,7 @@ section {
 }
 
 /*mobile*/
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 575.98px) {
     #how-it-works-section {
     width: 100%;
     }   

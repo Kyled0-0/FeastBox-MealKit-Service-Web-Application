@@ -1,9 +1,10 @@
 <template>
     <div class="container mt-5" >
-        <div class="text-success my-5" id="successMessage" v-show="MealForm.successPayment">
-            <h4><i class="bi bi-check-circle-fill"></i>Purchase successfully</h4>
+        <div class="text-success my-5" id="successMessage" v-show="successPayment">
+            <h4><i class="bi bi-check-circle-fill" aria-hidden="true"></i>Purchase successfully</h4>
         </div>
-        <div v-show="!MealForm.successPayment">
+        <div v-show="!successPayment">
+            <PaymentDemoBanner />
             <h2 class="text-center mb-4">Checkout and payment</h2>
         <div class="row">
             <!-- Payment method -->
@@ -35,26 +36,26 @@
                     <div class="mb-3">
                         <label for="cardName" class="form-label">Name on card</label>
                         <input type="text" class="form-control" id="cardName" v-model="paymentData.cardName"
-                            @input="validate('cardName')">
+                            @input="validate('cardName', paymentData)">
                         <p v-if="errors.cardName" class="text-danger fst-italic">{{ errors.cardName }}</p>
                     </div>
                     <div class="mb-3">
                         <label for="cardNumber" class="form-label">Card number</label>
-                        <input type="text" class="form-control" id="cardNumber" v-model="paymentData.cardNumber"
-                            placeholder="1234 1234 1234 1234" @input="validate('cardNumber')">
+                        <input type="text" class="form-control" id="cardNumber" inputmode="numeric" pattern="\d*" v-model="paymentData.cardNumber"
+                            placeholder="0000 0000 0000 0000 (demo)" @input="validate('cardNumber', paymentData)">
                         <p v-if="errors.cardNumber" class="text-danger fst-italic">{{ errors.cardNumber }}</p>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <label for="expiryDate" class="form-label">Expiry date</label>
                             <input type="text" class="form-control" id="expiryDate" v-model="paymentData.expiryDate"
-                                placeholder="MM/YY" @input="validate('expiryDate')">
+                                placeholder="MM/YY" @input="validate('expiryDate', paymentData)">
                             <p v-if="errors.expiryDate" class="text-danger fst-italic">{{ errors.expiryDate }}</p>
                         </div>
                         <div class="col-md-6">
                             <label for="cvc" class="form-label">CVC Number</label>
-                            <input type="text" class="form-control" id="cvc" v-model="paymentData.cvc" placeholder="CVC"
-                                @input="validate('cvc')">
+                            <input type="text" class="form-control" id="cvc" inputmode="numeric" pattern="\d*" v-model="paymentData.cvc" placeholder="000 (demo)"
+                                @input="validate('cvc', paymentData)">
                             <p v-if="errors.cvc" class="text-danger fst-italic">{{ errors.cvc }}</p>
                         </div>
                     </div>
@@ -70,23 +71,23 @@
                             <tbody>
                                 <tr>
                                     <td>Plan: </td>
-                                    <td class="text-end">{{ MealForm.planData.mealPerWeek }} Meals per week</td>
+                                    <td class="text-end">{{ planData.mealPerWeek }} Meals per week</td>
                                 </tr>
                                 <tr>
                                     <td>Plan type:</td>
-                                    <td class="text-end">{{ MealForm.planData.serving }} person box</td>
+                                    <td class="text-end">{{ planData.serving }} person box</td>
                                 </tr>
                                 <tr>
                                     <td>Meal preferences:</td>
-                                    <td class="text-end">{{ MealForm.planData.preference }}</td>
+                                    <td class="text-end">{{ planData.preference }}</td>
                                 </tr>
                                 <tr>
                                     <td>First delivery:</td>
-                                    <td class="text-end">{{ MealForm.deliveryData.deliveryDate }}</td>
+                                    <td class="text-end">{{ deliveryData.deliveryDate }}</td>
                                 </tr>
                                 <tr>
-                                    <td style="border: none;">Delivery slot:</td>
-                                    <td class="text-end" style="border: none;">{{ MealForm.deliveryData.deliverySlot }}
+                                    <td class="border-0">Delivery slot:</td>
+                                    <td class="text-end border-0">{{ deliveryData.deliverySlot }}
                                     </td>
                                 </tr>
                             </tbody>
@@ -100,24 +101,24 @@
                         <tbody>
                             <tr>
                                 <td>Box price</td>
-                                <td class="text-end">${{ MealForm.totalPrice }}</td>
+                                <td class="text-end">${{ totalPrice.toFixed(2) }}</td>
                             </tr>
                             <tr>
                                 <td>Shipping</td>
-                                <td class="text-end" style="color:#ff603d">FREE</td>
+                                <td class="text-end text-brand">FREE</td>
                             </tr>
                             <tr v-if="paymentData.voucher === 'FEAST20'">
                                 <td>FEAST20</td>
-                                <td class="text-end" style="color:#ff603d">20%</td>
+                                <td class="text-end text-brand">20%</td>
                             </tr>
                             <tr>
-                                <td style="border: none;">Total amount</td>
-                                <td class="text-end" style="border: none;"><span
+                                <td class="border-0">Total amount</td>
+                                <td class="text-end border-0"><span
                                         v-if="paymentData.voucher === 'FEAST20'"><span
-                                            style="text-decoration: line-through; text-decoration-color: #ff603d;">${{
-                                                MealForm.totalPrice }}</span> <strong>${{ totalPriceVoucher
+                                            class="price-original">${{
+                                                totalPrice.toFixed(2) }}</span> <strong>${{ totalPriceVoucher.toFixed(2)
                                             }}</strong></span><strong v-if="paymentData.voucher !== 'FEAST20'"> ${{
-                                                MealForm.totalPrice }}</strong>
+                                                totalPrice.toFixed(2) }}</strong>
                                 </td>
                             </tr>
                         </tbody>
@@ -127,14 +128,14 @@
                 <div class="mb-0 mt-4">
                     <label for="voucher" class="form-label">Voucher</label>
                     <input type="text" class="form-control" id="voucher" v-model="paymentData.voucher"
-                        @input="validate('voucher')">
+                        @input="validate('voucher', paymentData)">
                     <p v-if="errors.voucher" class="text-danger fst-italic">{{ errors.voucher }}</p>
                 </div>
                 <div class="mt-2 mb-0">
 
-                    <input type="checkbox" name="terms&conditions" id="terms&cons" v-model="paymentData.terms"
-                        @click="validate('terms')">
-                    I accept the <span style="color: #ff603d;">Terms and Conditions</span> of
+                    <input type="checkbox" name="terms-conditions" id="terms-conditions" v-model="paymentData.terms"
+                        @change="validate('terms', paymentData)">
+                    I accept the <span class="text-brand">Terms and Conditions</span> of
                     FeastBox
                     <p class="text-danger fst-italic">{{ errors.terms }}</p>
                 </div>
@@ -150,67 +151,47 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useMealForm } from '../stores/form';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
+import { useMealForm } from '../stores/form'
+import { useFormValidation } from '@/composables/useFormValidation'
+import { required, digits, accepted } from '@/utils/validators'
+import PaymentDemoBanner from '@/components/PaymentDemoBanner.vue'
 
-const MealForm = useMealForm();
-const paymentData = MealForm.paymentData; 
-const router = useRouter();
-const emit = defineEmits(['successPayment']);
+const MealForm = useMealForm()
+const { paymentData, totalPriceVoucher, planData, deliveryData, successPayment, totalPrice } = storeToRefs(MealForm)
+const { updatePaymentStatus } = MealForm
+const paymentMethod = ref('creditCard') // Phase 2: extend with additional payment methods
+const router = useRouter()
 
-const totalPriceVoucher = computed(() => MealForm.totalPriceVoucher);
+const validExpiry = (v) => {
+  if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(v)) return 'Invalid format MM/YY'
+  const [month, year] = v.split('/').map(Number)
+  const now = new Date()
+  const currentYear = now.getFullYear() % 100
+  const currentMonth = now.getMonth() + 1
+  if (year < currentYear || (year === currentYear && month < currentMonth)) return 'Card has expired'
+  return null
+}
 
-const errors = ref({});
-
-const validate = (field) => {
-    const value = paymentData[field];
-    if (field === 'terms' && !value) {
-        errors.value.terms = 'Must accept to proceed'
-    } else if (!value && field !== 'voucher') {
-        errors.value[field] = "This field can't be blank";
-    } else if (field === 'cardNumber' && value.length !== 16) {
-        errors.value.cardNumber = 'Invalid card number';
-    } else if (field === 'expiryDate') {
-        
-        const format = /^(0[1-9]|1[0-2])\/\d{2}$/;
-
-        if (!format.test(value)) {
-            errors.value.expiryDate = 'Invalid format MM/YY';
-            return;
-        }
-        const [month, year] = value.split('/').map(Number);
-        const currentYear = new Date().getFullYear() % 100; 
-        const currentMonth = new Date().getMonth() + 1; 
-
-        if (year < currentYear || (year === currentYear && month < currentMonth)) {
-            errors.value.expiryDate = 'Card has expired';
-        } else {
-            errors.value.expiryDate = ''; 
-        }
-
-    } else if (field === 'cvc' && value.length !== 3) {
-        errors.value.cvc = 'Invalid CVC number';
-    } else if (field === 'voucher' && value !== '' && value !== 'FEAST20') {
-        
-        errors.value.voucher = 'Invalid voucher code';
-    } else {
-        errors.value[field] = ''; 
-    }
-};
+const { errors, validate, validateAll, isValid } = useFormValidation({
+  cardName: [required()],
+  cardNumber: [required(), digits(16, 'Card number must be 16 digits')],
+  expiryDate: [required(), validExpiry],
+  cvc: [required(), digits(3, 'CVC must be 3 digits')],
+  terms: [accepted('Must accept to proceed')]
+})
 
 const handleSubmit = () => {
-    
-    Object.keys(paymentData).forEach(field => validate(field));
-
-    if (Object.values(errors.value).every(error => !error)) {
-        MealForm.updatePaymentStatus(true);
-        setTimeout(() => {
-            router.push('/menu'); 
-        }, 2000);
-        
-    }
-};
+  validateAll(paymentData.value)
+  if (isValid.value) {
+    updatePaymentStatus(true)
+    setTimeout(() => {
+      router.push('/menu')
+    }, 2000) // 2 s for the success banner before navigating
+  }
+}
 </script>
 
 <style scoped>
@@ -228,14 +209,18 @@ h5 {
 }
 
 .btn-custom2 {
-    background-color: #FFC907;
+    background-color: var(--color-brand-yellow);
     border-radius: 30px;
     font-size: 17px;
-
 }
 
 .btn-custom2:hover {
-    background-color: #ffdb5a;
+    background-color: var(--color-brand-yellow-light);
+}
+
+.price-original {
+    text-decoration: line-through;
+    text-decoration-color: var(--color-brand-orange);
 }
 
 .text-danger {
@@ -243,7 +228,7 @@ h5 {
     margin-bottom: 0px;
 }
 
-@media only screen and (max-width: 830px) {
+@media only screen and (max-width: 991.98px) {
     #summary {
         margin-top: 50px;
     }

@@ -1,5 +1,8 @@
 import { defineStore } from "pinia";
 
+export const PRICE_PER_SERVING = 6.99
+export const VOUCHER_DISCOUNT = 0.8
+
 export const useMealForm = defineStore('MealForm', {
     state: () => ({
       planData:{
@@ -31,8 +34,8 @@ export const useMealForm = defineStore('MealForm', {
     }),
     getters:{
       totalServings: (state) => state.planData.serving * state.planData.mealPerWeek,
-      totalPrice: (state) => state.totalServings * 6.99,
-      totalPriceVoucher: (state) => (state.totalPrice * 80 / 100).toFixed(2)
+      totalPrice: (state) => state.totalServings * PRICE_PER_SERVING,
+      totalPriceVoucher: (state) => state.totalPrice * VOUCHER_DISCOUNT
 
     },
 

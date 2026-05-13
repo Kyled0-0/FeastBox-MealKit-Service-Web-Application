@@ -1,0 +1,33 @@
+:root {
+  /* Brand colours */
+  --color-brand-orange: #ff603d;
+  --color-brand-orange-tint: #fff8f6;
+  --color-brand-blue: #70d4ea;
+  --color-brand-blue-light: #a5e0ed;
+  --color-brand-blue-highlight: #4fcde9;
+  --color-brand-blue-tint: #def9ff;
+  --color-brand-yellow: #ffc907;
+  --color-brand-yellow-light: #ffdb5a;
+
+  /* Spacing scale (0.25rem steps) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Breakpoints (read-only reference — use in media queries directly) */
+  --bp-sm:   576px;
+  --bp-md:   768px;
+  --bp-lg:   992px;
+  --bp-xl:  1200px;
+  --bp-xxl: 1400px;
+}
+
+/* Utility class for brand orange text */
+.text-brand {
+  color: var(--color-brand-orange);
+}
