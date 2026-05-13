@@ -114,6 +114,10 @@ function handleSubmit() {
 </script>
 
 <style scoped>
+.contact-inner {
+    width: 70%;
+}
+
 #contact-info{
 
     margin-top: 100px;
