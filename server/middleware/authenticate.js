@@ -1,3 +1,3 @@
 export function authenticate(req, res, next) {
-  next()  // stub — replaced in Task 8
+  next()  // stub: replaced in Task 8
 }

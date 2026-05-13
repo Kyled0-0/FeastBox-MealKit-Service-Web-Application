@@ -14,7 +14,7 @@ export function createApp() {
   app.use(helmet())
   app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
 
-  // Webhook before express.json() — raw body required for Stripe HMAC (Task 12)
+  // Webhook before express.json(): raw body required for Stripe HMAC (Task 12)
   app.post(
     '/payments/webhook',
     express.raw({ type: 'application/json', limit: '1mb' }),
@@ -31,6 +31,7 @@ export function createApp() {
   app.use('/orders', ordersRouter)
   app.use('/payments', paymentsRouter)
 
+  app.use((_req, res) => res.status(404).json({ error: 'Not found' }))
   app.use(errorHandler)
 
   return app
