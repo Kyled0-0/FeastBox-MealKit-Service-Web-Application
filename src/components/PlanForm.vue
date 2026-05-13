@@ -6,7 +6,7 @@
                 <!-- Meal Preferences Section -->
                 <div class="col-md-6 px-4" id="meal-kind">
                     <p class="fw-bold mb-0">What meals excite your taste buds?</p>
-                    <p style="text-align: justify;">Pick your favorite flavors for personalized recipe ideas, or go with Everyday Variety for a
+                    <p class="preference-desc">Pick your favorite flavors for personalized recipe ideas, or go with Everyday Variety for a
                         delicious mix.
                         No matter what you choose, you’ll have access to all our mouth-watering recipes every week!</p>
 
@@ -141,6 +141,10 @@ function switchStep() {
 #plan p:nth-child(2) {
     color: rgb(112, 111, 111);
     font-size: 15px;
+}
+
+.preference-desc {
+    text-align: justify;
 }
 
 .btn-custom-plan,

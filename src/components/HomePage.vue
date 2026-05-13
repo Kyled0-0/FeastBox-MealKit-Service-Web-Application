@@ -65,8 +65,8 @@
 
         <section id="meals-view" class="content-section text-center">
             <div>
-                <h2 class="fw-bold text-brand" style="margin-bottom:-10px;">CHOOSE FROM</h2>
-                <p class="fw-semibold" style="font-size: 35px;">50+ meal options</p>
+                <h2 class="fw-bold text-brand choose-label">CHOOSE FROM</h2>
+                <p class="fw-semibold choose-count">50+ meal options</p>
             </div>
             <MealStrip :meals="featuredMeals" />
                 <router-link class="btn btn-custom fw-semibold p-3 mt-3" to="/menu">Browse Our
@@ -83,7 +83,7 @@
                     fresh, pre-portioned ingredients and easy-to-follow recipes, making gourmet cooking simple and fun.
                 </p>
                 <router-link to="/meal-plan"  class="btn btn-custom fw-bold p-2 mt-3">Get 20% Off</router-link>
-                <p class="lead" style="font-size: 14px;">Get 20% off your first box with code <span class="fw-semibold">FEAST20</span>. Start
+                <p class="lead promo-text">Get 20% off your first box with code <span class="fw-semibold">FEAST20</span>. Start
                     your culinary adventure today!</p>
             </div>
         </section>
@@ -181,6 +181,14 @@ const featuredMeals = [
 
 #inside-text-ad h2 {
     color: var(--color-brand-orange);
+}
+
+.choose-label {
+    margin-bottom: -10px;
+}
+
+.choose-count {
+    font-size: 35px;
 }
 /*tablet*/
 @media only screen and (max-width: 991.98px) {

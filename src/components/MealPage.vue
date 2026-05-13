@@ -1,5 +1,5 @@
 <template>
-    <div class="container" style="width: 80%;" v-if="meal_display">
+    <div class="container meal-wrapper" v-if="meal_display">
         <section id="description">
             <div class="row">
                 <div class="col-lg-6 col-md-12 container">
@@ -79,7 +79,7 @@
 </template>
 
 <script setup>
-import { defineProps, computed } from 'vue';
+import { computed } from 'vue'
 
 function getImage(name)
 {
@@ -734,6 +734,10 @@ const meal_display = computed(() => {
 </script>
 
 <style scoped>
+.meal-wrapper {
+    width: 80%;
+}
+
 section {
     margin-top: 70px;
 }
@@ -851,7 +855,7 @@ hr {
     font-weight: bold;
 }
 
-::v-deep .card-text span {
+:deep(.card-text span) {
     font-weight: bold;
 }
 /*tablet*/

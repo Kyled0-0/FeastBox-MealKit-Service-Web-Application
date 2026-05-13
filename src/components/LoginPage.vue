@@ -20,7 +20,7 @@
                 <p v-if="errors.password" class="text-danger fst-italic mt-1">{{ errors.password }}</p>
             </div>
             <div class="mb-3 text-end">
-                <span class="text-decoration-none text-muted" style="font-size:0.9rem;">Forgot your password?</span>
+                <span class="text-decoration-none text-muted forgot-text">Forgot your password?</span>
             </div>
             <button type="submit" class="btn btn-custom w-100 fw-semibold">Log in</button>
         </form>
@@ -64,6 +64,10 @@ function handleSubmit() {
 a,
 p {
     font-size: 12px;
+}
+
+.forgot-text {
+    font-size: 0.9rem;
 }
 
 

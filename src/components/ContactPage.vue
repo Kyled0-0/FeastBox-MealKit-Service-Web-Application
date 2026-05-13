@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid px-0" id="contact-info">
-        <div class="container" style="width: 70%;">
+        <div class="container contact-inner">
             <div class="row">
                 <div class="col-md-7 contact-form">
                     <div class="py-4">
@@ -76,7 +76,7 @@
                     fresh, pre-portioned ingredients and easy-to-follow recipes, making gourmet cooking simple and fun.
                 </p>
                 <router-link to="/meal-plan"  class="btn btn-custom fw-bold p-2 mt-3">Get 20% Off</router-link>
-                <p class="lead" style="font-size: 14px;">Get 20% off your first box with code <span class="fw-semibold">FEAST20</span>. Start
+                <p class="lead promo-text">Get 20% off your first box with code <span class="fw-semibold">FEAST20</span>. Start
                     your culinary adventure today!</p>
             </div>
         </section>

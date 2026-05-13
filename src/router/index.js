@@ -38,7 +38,7 @@ const routes = [
     component: () => import('@/components/MealPlan.vue'),
     meta: { showNavbar: false },
     children: [
-      { path: '', redirect: 'planform' },
+      { path: '', redirect: { name: 'planform' } },
       {
         path: 'planform',
         name: 'planform',

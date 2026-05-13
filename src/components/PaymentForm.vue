@@ -86,8 +86,8 @@
                                     <td class="text-end">{{ deliveryData.deliveryDate }}</td>
                                 </tr>
                                 <tr>
-                                    <td style="border: none;">Delivery slot:</td>
-                                    <td class="text-end" style="border: none;">{{ deliveryData.deliverySlot }}
+                                    <td class="border-0">Delivery slot:</td>
+                                    <td class="text-end border-0">{{ deliveryData.deliverySlot }}
                                     </td>
                                 </tr>
                             </tbody>
@@ -112,10 +112,10 @@
                                 <td class="text-end text-brand">20%</td>
                             </tr>
                             <tr>
-                                <td style="border: none;">Total amount</td>
-                                <td class="text-end" style="border: none;"><span
+                                <td class="border-0">Total amount</td>
+                                <td class="text-end border-0"><span
                                         v-if="paymentData.voucher === 'FEAST20'"><span
-                                            style="text-decoration: line-through; text-decoration-color: var(--color-brand-orange);">${{
+                                            class="price-original">${{
                                                 totalPrice.toFixed(2) }}</span> <strong>${{ totalPriceVoucher.toFixed(2)
                                             }}</strong></span><strong v-if="paymentData.voucher !== 'FEAST20'"> ${{
                                                 totalPrice.toFixed(2) }}</strong>
@@ -216,6 +216,11 @@ h5 {
 
 .btn-custom2:hover {
     background-color: var(--color-brand-yellow-light);
+}
+
+.price-original {
+    text-decoration: line-through;
+    text-decoration-color: var(--color-brand-orange);
 }
 
 .text-danger {

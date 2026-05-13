@@ -84,7 +84,7 @@
 
                     <div class="d-flex justify-content-start align-items-center">
                         <img src="/src/assets/resources/img/calendar.png" width="50px" class="me-3" alt="Calendar Icon">
-                        <div style="font-size: 15px; text-align: justify;">
+                        <div class="delivery-note">
                             <p class="mb-0"><strong>You will get your meal box every {{ deliveryDay }} {{deliveryData.deliverySlot}}.</strong> You can always change your delivery day and time slot for future orders.</p>
                         </div>
                     </div>
@@ -194,6 +194,11 @@ input[type="radio"]:checked+label {
 
 .btn-custom2:hover {
     background-color: var(--color-brand-yellow-light);
+}
+
+.delivery-note {
+    font-size: 15px;
+    text-align: justify;
 }
 
 .text-danger{
