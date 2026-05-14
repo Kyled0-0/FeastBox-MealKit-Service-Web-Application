@@ -27,7 +27,6 @@ A fullstack meal-kit delivery web application. Browse curated meal plans, manage
 
 **Infrastructure**
 - Docker + docker-compose
-- Railway (API + database)
 - Vercel (frontend)
 
 ---
@@ -180,29 +179,27 @@ This project applies named software engineering principles to every tool and arc
 
 **Phase 0 — Frontend optimisation**
 - [x] Vue 3 frontend — meal browsing, cart, UI
-- [ ] Debounced multi-field search composable (`useSearch`)
-- [ ] Client-side pagination composable (`usePagination`)
-- [ ] Route-level lazy loading
-- [ ] `v-memo` on static meal cards
-- [ ] Pinia store audit — flatten state, remove no-op getters
+- [x] Debounced multi-field search composable (`useSearch`)
+- [x] Client-side pagination composable (`usePagination`)
+- [x] Route-level lazy loading
+- [x] `v-memo` on static meal cards
+- [x] Pinia store audit — flatten state, remove no-op getters
 
 **Phase 1 — Frontend deploy**
 - [x] Vercel deployment
 
 **Phase 2 — Backend + database**
-- [ ] Monorepo structure (`/client`, `/server`)
-- [ ] Express API + PostgreSQL schema
-- [ ] JWT authentication (register, login, refresh)
+- [x] Monorepo structure (`/client`, `/server`)
+- [x] Express API + PostgreSQL schema
+- [x] JWT authentication (register, login, refresh)
 - [ ] Meals + orders endpoints
 - [ ] Stripe checkout + webhook
-- [ ] Railway deployment
 
 **Phase 3 — Containerisation + CI/CD**
-- [ ] Docker + docker-compose
+- [x] Docker + docker-compose
 - [ ] GitHub Actions CI/CD
-- [ ] Redis caching
 
-**Week 2 — Enhancements**
+**Future Enhancements**
 - [ ] AI recipe chatbot (Anthropic API)
 - [ ] OAuth login (Google)
 - [ ] Stripe subscription billing
