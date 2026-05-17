@@ -11,6 +11,8 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "test": "vitest run",
+    "test:auth": "vitest run auth",
+    "test:security": "vitest run routes/auth.security.test.js",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "db:migrate": "prisma migrate dev",
