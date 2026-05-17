@@ -11,7 +11,7 @@ import {
 import { registerSchema, loginSchema } from '../schemas/auth.schema.js'
 import { logger } from '../logger.js'
 
-// Precomputed hash for timing parity — verifyPassword is always called in login
+// Precomputed hash for timing parity. verifyPassword is always called in login
 // so an attacker cannot enumerate valid emails via response-time differences.
 const DUMMY_HASH = await hashPassword('timing_parity_never_matches_any_real_password_xZ9#')
 
@@ -59,7 +59,7 @@ async function login(req, res, next) {
     select: { id: true, passwordHash: true }
   })
 
-  // Always call verifyPassword — prevents email enumeration via timing.
+  // Always call verifyPassword: prevents email enumeration via timing.
   const valid = await verifyPassword(password, user?.passwordHash ?? DUMMY_HASH)
   if (!valid || !user) {
     logger.warn({ event: 'auth.login', outcome: 'failure' })

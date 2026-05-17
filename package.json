@@ -10,7 +10,10 @@
     "deploy": "gh-pages -d dist",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:server": "npm run test --prefix server",
+    "test:server:auth": "npm run test:auth --prefix server",
+    "test:server:security": "npm run test:security --prefix server"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
