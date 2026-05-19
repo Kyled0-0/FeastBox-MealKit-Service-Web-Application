@@ -24,11 +24,15 @@ model User {
 model Meal {
   id                   String      @id @default(cuid())
   title                String
+  nameExtend           String
   description          String
   cuisine              String
   tags                 String[]
   imageUrl             String
   pricePerServingCents Int
+  nutriFacts           Json
+  ingredients          Json
+  steps                Json
   createdAt            DateTime    @default(now())
   orderItems           OrderItem[]
 }
