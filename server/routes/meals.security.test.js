@@ -157,6 +157,17 @@ describe('GET /meals', () => {
     expect(args.skip).toBe(20)
     expect(args.take).toBe(10)
   })
+
+  it('accepts pageSize=100 (cross-boundary check: matches MENU_PAGE_SIZE in src/stores/meals.js)', async () => {
+    // If MEALS_PAGE_SIZE_MAX is ever dropped below 100, this test goes red.
+    // The frontend store hardcodes ?pageSize=100; the only place we can
+    // catch the drift before a cross-service deploy surfaces it as a 400
+    // in production is here. Update the frontend constant in lockstep if
+    // you change MEALS_PAGE_SIZE_MAX.
+    prisma.meal.findMany.mockResolvedValue([])
+    const res = await request(app).get('/meals?pageSize=100')
+    expect(res.status).toBe(200)
+  })
 })
 
 describe('GET /meals/:id', () => {

@@ -22,51 +22,66 @@
       </div>
     </section>
 
-    <section id="menu">
+    <section id="menu" :aria-busy="loading">
       <h2>What are you craving</h2>
-      <div class="row g-5">
-        <div class="col-md-3" v-for="meal in paginated" :key="meal.id">
-          <MealCard v-memo="[meal.id]" :meal="meal" />
+
+      <div v-if="loading" class="d-flex justify-content-center py-5">
+        <div class="spinner-border text-secondary" role="status">
+          <span class="visually-hidden">Loading meals...</span>
         </div>
-        <p v-if="results.length === 0" class="text-center">No meals found.</p>
       </div>
 
-      <div v-if="totalPages > 1" class="d-flex justify-content-center align-items-center gap-3 mt-4">
-        <button class="btn btn-outline-secondary" :disabled="page === 1" @click="prev">Prev</button>
-        <span>{{ page }} / {{ totalPages }}</span>
-        <button class="btn btn-outline-secondary" :disabled="page === totalPages" @click="next">Next</button>
+      <div v-else-if="error" class="alert alert-danger" role="alert">
+        <p class="mb-2">{{ error.message }}</p>
+        <button type="button" class="btn btn-sm btn-outline-danger" @click="retry">
+          Try again
+        </button>
       </div>
+
+      <template v-else>
+        <p v-if="results.length === 0" class="text-center">No meals found.</p>
+
+        <div v-else class="row g-5">
+          <div class="col-md-3" v-for="meal in paginated" :key="meal.id">
+            <MealCard v-memo="[meal.id]" :meal="meal" />
+          </div>
+        </div>
+
+        <div v-if="totalPages > 1" class="d-flex justify-content-center align-items-center gap-3 mt-4">
+          <button class="btn btn-outline-secondary" :disabled="page === 1" @click="prev">Prev</button>
+          <span>{{ page }} / {{ totalPages }}</span>
+          <button class="btn btn-outline-secondary" :disabled="page === totalPages" @click="next">Next</button>
+        </div>
+      </template>
     </section>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useMeals } from '@/stores/meals'
 import { useSearch } from '@/composables/useSearch'
 import { usePagination } from '@/composables/usePagination'
 import MealCard from '@/components/MealCard.vue'
-import beefWraps from '/src/assets/resources/img/beefwraps/beef-wraps.jpeg'
-import haloumiSalads from '/src/assets/resources/img/haloumisalad/haloumi-salad.jpeg'
-import musselRissoto from '/src/assets/resources/img/musselrisotto/mussel_risotto.jpeg'
-import sesameSalmon from '/src/assets/resources/img/sesamesalmon/sesame_salmon.jpeg'
-import lambPizza from '/src/assets/resources/img/lambpizza/lamb_pizza.jpeg'
-import butterWings from '/src/assets/resources/img/butterchicken/butter_chicken.jpeg'
-import noodleSoup from '/src/assets/resources/img/noodlesoup/noodle_soup.jpeg'
-import chickenWings from '/src/assets/resources/img/chickenwings/chicken_wings.jpeg'
 
-const meals = ref([
-  { id: '01', title: 'Fast Peppered Beef Wraps', description: 'with Chimichurri Tomato and Aioli', image: beefWraps },
-  { id: '02', title: 'Easy Veggie and Haloumi Salad', description: 'with Red Pesto Dressing', image: haloumiSalads },
-  { id: '03', title: 'Mediterranean Mussel and Tomato Risotto', description: 'with Fresh Spinach and Parsley', image: musselRissoto },
-  { id: '04', title: 'Sesame Soy-Glazed Salmon', description: 'with Broccoli, Pak Choy and Brown Rice', image: sesameSalmon },
-  { id: '05', title: 'Lebanese-Style Lamb Pizza', description: 'with Spinach Salad and Mint Yoghurt', image: lambPizza },
-  { id: '06', title: 'Easy Plant-Based Butter Chicken', description: 'with Cumin Rice and Quick Red Onion Pickle', image: butterWings },
-  { id: '07', title: 'Chicken Dumpling-Noodle Soup', description: 'with Greens and Chilli Vinegar', image: noodleSoup },
-  { id: '08', title: 'Sticky Chicken Wings', description: 'with Coconut Rice and Stir-Fried Vegetables', image: chickenWings },
-])
+const mealsStore = useMeals()
+const { meals, loading, error } = storeToRefs(mealsStore)
+const { fetchMeals } = mealsStore
 
-const { query, results } = useSearch(meals, ['title', 'description'])
+// Search fields MUST match what MealCard renders. Cards show title only;
+// searching nameExtend/description would create the "I typed something real
+// and got no match" UX bug because the matched substring is invisible on
+// the card. Expand this list only in lockstep with a visible card field.
+const { query, results } = useSearch(meals, ['title'])
 const { page, totalPages, paginated, next, prev } = usePagination(results, 9)
+
+// Wrapper closure so @click does not leak its MouseEvent into the action
+// (no-op today, latent footgun if fetchMeals ever grows an optional first
+// arg). Mirrors the retry helper in MealPage.vue.
+const retry = () => fetchMeals()
+
+onMounted(fetchMeals)
 </script>
 
 <style scoped>

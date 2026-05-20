@@ -26,11 +26,20 @@ export const useMeals = defineStore('meals', () => {
   const loading = ref(false)
   const error = ref(null)
 
+  // Server defaults to pageSize=25 (`server/schemas/meals.schema.js`). The
+  // catalogue has 8 meals today, but the menu UI does client-side search +
+  // pagination over the entire list, so a silent server-side cap would mean
+  // users could not search for or page to meals that exist. Request the
+  // server-side maximum (100) until either the catalogue grows past it or
+  // search moves server-side (Task 11+). Revisit trigger: catalogue size
+  // approaches MEALS_PAGE_SIZE_MAX, or filter/search-by-server lands.
+  const MENU_PAGE_SIZE = 100
+
   async function fetchMeals() {
     loading.value = true
     error.value = null
     try {
-      meals.value = await api.get('/meals')
+      meals.value = await api.get(`/meals?pageSize=${MENU_PAGE_SIZE}`)
     } catch (e) {
       error.value = toErrorShape(e)
       meals.value = []

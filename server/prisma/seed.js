@@ -3,7 +3,11 @@ import { sanitiseMealSteps } from '../services/sanitiseMealContent.js'
 
 const PRICE_CENTS = 1200
 
-const img = (path) => `/src/assets/resources/img/${path}`
+// Public assets path. Vite copies `public/` verbatim, so the same `/img/meals/...`
+// URL resolves in dev (Vite dev server), prod build (Vercel static), and any
+// preview server without an import-graph rewrite. Source folders moved out of
+// `src/assets/resources/img/` to `public/img/meals/` for this reason.
+const img = (path) => `/img/meals/${path}`
 
 const meals = [
   {
