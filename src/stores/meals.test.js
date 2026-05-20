@@ -39,7 +39,9 @@ describe('useMeals', () => {
     api.get.mockResolvedValue([{ id: 'a', title: 'Beef Wraps' }])
     const store = useMeals()
     await store.fetchMeals()
-    expect(api.get).toHaveBeenCalledWith('/meals')
+    // Explicit pageSize=100 (server max) until search moves server-side —
+    // see the MENU_PAGE_SIZE comment in meals.js.
+    expect(api.get).toHaveBeenCalledWith('/meals?pageSize=100')
     expect(store.meals).toEqual([{ id: 'a', title: 'Beef Wraps' }])
     expect(store.loading).toBe(false)
     expect(store.error).toBeNull()

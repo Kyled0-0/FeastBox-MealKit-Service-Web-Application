@@ -1,10 +1,9 @@
 <template>
   <router-link :to="{ name: 'meal-page', params: { mealID: meal.id } }" class="card-link">
     <div class="card h-100">
-      <img :src="meal.image" :alt="meal.title" class="card-img-top">
+      <img :src="meal.imageUrl" :alt="meal.title" class="card-img-top">
       <div class="card-body text-center">
         <p class="card-title fw-bold mb-0">{{ meal.title }}</p>
-        <p class="card-text">{{ meal.description }}</p>
       </div>
     </div>
   </router-link>
