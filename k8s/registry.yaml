@@ -1,11 +1,4 @@
-# In-cluster Container Registry. Deployed as an HD-evidence resource
-# (ULO1: distinct cloud resource; ULO4: represents the build-tag-push-pull
-# lifecycle). NOT used as the actual pull source on Docker Desktop kind,
-# because that cluster's containerd routes pulls through an internal
-# mirror that doesn't proxy custom registries -- the api/migration
-# manifests use imagePullPolicy: Never and apply.sh loads images via
-# `ctr import` instead. In a production cluster the same registry would
-# be the real pull source.
+# In-cluster Container Registry
 
 apiVersion: apps/v1
 kind: Deployment

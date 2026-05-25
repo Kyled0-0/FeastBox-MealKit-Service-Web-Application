@@ -1,5 +1,4 @@
-# LoadBalancer so Docker Desktop auto-binds localhost:3000 (no
-# port-forwarding ceremony for the demo).
+# LoadBalancer so Docker Desktop auto-binds localhost:3000
 
 apiVersion: v1
 kind: Service

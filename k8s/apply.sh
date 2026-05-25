@@ -1,17 +1,4 @@
-#!/usr/bin/env bash
-# Orchestrated apply for the FeastBox K8s stack.
-#
-# Why this is a script (not raw `kubectl apply -f k8s/`):
-#   - The api Deployment must not start until Postgres is Ready AND the
-#     migration Job has completed; apply.sh enforces ordering with
-#     `kubectl wait`.
-#   - The migration Job is not re-runnable by plain `kubectl apply`
-#     (apply on a completed Job is a no-op); we delete first with
-#     --ignore-not-found.
-#   - Docker Desktop's kind containerd does not pull from custom
-#     registries; we `docker save` then `ctr import` the image into the
-#     worker node via a privileged loader pod.
-#
+
 # Run from the repo root: `bash k8s/apply.sh`
 
 set -euo pipefail

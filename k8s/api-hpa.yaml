@@ -1,8 +1,3 @@
-# Scales the api Deployment 2-5 replicas at 60% CPU. Requires
-# metrics-server installed in the cluster (see DEMO_RUNBOOK.txt step A.2).
-# stabilizationWindowSeconds: 0 on scale-up so scale events appear quickly
-# in the demo (default 5-minute window would hide them).
-
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

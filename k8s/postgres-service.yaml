@@ -1,6 +1,5 @@
 # ClusterIP only: the DB is consumed by the api Deployment, never directly
-# by external clients. Public exposure of Postgres is a common production
-# breach vector.
+# by external clients. Public exposure of Postgres is a common production breach vector.
 
 apiVersion: v1
 kind: Service

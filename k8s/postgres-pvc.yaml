@@ -1,6 +1,5 @@
 # 1Gi storage for the Postgres data dir. Docker Desktop's default
 # StorageClass is hostpath (reclaimPolicy: Delete) so data is lost on
-# `kubectl delete pvc` -- intentional for the demo, fresh apply.sh runs reseed.
 
 apiVersion: v1
 kind: PersistentVolumeClaim
