@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:db": "docker compose up -d --wait db",
+    "dev:migrate": "npm --prefix server run db:migrate:deploy",
+    "dev:server": "npm --prefix server run dev",
+    "dev:all": "npm run dev:db && npm run dev:migrate && concurrently -k -n vite,api -c cyan,magenta \"npm run dev\" \"npm run dev:server\"",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist",
@@ -26,6 +30,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.2",
     "@vue/test-utils": "^2.4.9",
+    "concurrently": "^9.2.1",
     "gh-pages": "^6.3.0",
     "happy-dom": "^20.9.0",
     "vite": "^5.4.1",

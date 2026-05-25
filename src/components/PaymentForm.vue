@@ -1,9 +1,6 @@
 <template>
-    <div class="container mt-5" >
-        <div class="text-success my-5" id="successMessage" v-show="successPayment">
-            <h4><i class="bi bi-check-circle-fill" aria-hidden="true"></i>Purchase successfully</h4>
-        </div>
-        <div v-show="!successPayment">
+    <div class="container mt-5">
+        <div>
             <PaymentDemoBanner />
             <h2 class="text-center mb-4">Checkout and payment</h2>
         <div class="row">
@@ -18,7 +15,7 @@
                         </label>
                         <div class="d-flex justify-content-start mt-2">
                             <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard"
-                                v-model="paymentMethod" value="creditCard" checked>
+                                value="creditCard" checked>
                             <div class="ms-2">
                                 <img src="/src/assets/resources/img/mastercard.png" width="40px" class="me-2">
                                 <img src="/src/assets/resources/img/visa.png" width="40px">
@@ -140,9 +137,13 @@
                     <p class="text-danger fst-italic">{{ errors.terms }}</p>
                 </div>
 
-                <button type="button" class="btn btn-custom2 w-100 fw-bold mt-0" @click.prevent="handleSubmit">Place
-                    order &
-                    choose meals</button>
+                <p v-if="submitError" class="text-danger fst-italic mt-2 mb-0" role="alert">{{ submitError }}</p>
+
+                <button type="button" class="btn btn-custom2 w-100 fw-bold mt-0" :disabled="orderLoading"
+                    @click.prevent="handleSubmit">
+                    <span v-if="orderLoading" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                    {{ orderLoading ? 'Placing order…' : 'Place order & choose meals' }}
+                </button>
             </div>
         </div>
         </div>
@@ -155,14 +156,18 @@ import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useMealForm } from '../stores/form'
+import { useOrders } from '@/stores/orders'
 import { useFormValidation } from '@/composables/useFormValidation'
 import { required, digits, accepted } from '@/utils/validators'
 import PaymentDemoBanner from '@/components/PaymentDemoBanner.vue'
 
 const MealForm = useMealForm()
-const { paymentData, totalPriceVoucher, planData, deliveryData, successPayment, totalPrice } = storeToRefs(MealForm)
-const { updatePaymentStatus } = MealForm
-const paymentMethod = ref('creditCard') // Phase 2: extend with additional payment methods
+const { paymentData, totalPriceVoucher, planData, deliveryData, totalPrice, totalServings } = storeToRefs(MealForm)
+
+const ordersStore = useOrders()
+const { loading: orderLoading } = storeToRefs(ordersStore)
+
+const submitError = ref(null)
 const router = useRouter()
 
 const validExpiry = (v) => {
@@ -183,22 +188,46 @@ const { errors, validate, validateAll, isValid } = useFormValidation({
   terms: [accepted('Must accept to proceed')]
 })
 
-const handleSubmit = () => {
+// HD-scope wiring: the wizard collects abstract servings (mealPerWeek × box
+// size) without picking specific meals, so we send only { servings, voucher }
+// and the server picks the box product + computes total from the DB price.
+// Card fields are validated for shape only — Stripe replaces this in Task 12.
+//
+// Auth dependency: POST /orders requires a JWT access token. Until Task 9
+// frontend auth integration ships, a 401 here means "log in first" — we
+// redirect to /login. EXECUTION_LOG entry documents this gap for the demo.
+const handleSubmit = async () => {
+  submitError.value = null
   validateAll(paymentData.value)
-  if (isValid.value) {
-    updatePaymentStatus(true)
-    setTimeout(() => {
-      router.push('/menu')
-    }, 2000) // 2 s for the success banner before navigating
+  if (!isValid.value) return
+
+  try {
+    const voucher = paymentData.value.voucher === 'FEAST20' ? 'FEAST20' : undefined
+    const order = await ordersStore.createOrder({
+      servings: totalServings.value,
+      voucher
+    })
+    router.push({ name: 'order-confirmation', params: { id: order.id } })
+  } catch (e) {
+    if (e?.status === 401) {
+      submitError.value = 'Please log in to place an order.'
+      router.push('/login')
+      return
+    }
+    // 5xx/408 produce developer-facing strings ("Request failed with status
+    // 500", "Request timed out") from api.js. Replace with a user-facing
+    // message; 4xx keeps the server-supplied `error` field which is already
+    // human-readable (Zod field errors etc.).
+    if ((e?.status ?? 0) >= 500 || e?.status === 408) {
+      submitError.value = 'Something went wrong on our end. Please try again in a moment.'
+      return
+    }
+    submitError.value = e?.message ?? 'Could not place the order. Please try again.'
   }
 }
 </script>
 
 <style scoped>
-#successMessage {
-    text-align: center;
-}
-
 .table td,
 .table th {
     padding: 5px;

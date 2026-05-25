@@ -64,6 +64,17 @@ const routes = [
     name: 'howitworks',
     component: () => import('@/components/Howitworks.vue'),
     meta: { showNavbar: true }
+  },
+  {
+    // User-facing path uses `/order-confirmation/:id` rather than `/orders/:id`
+    // because there is no `/orders` list view (Task 11 spec: by-ID only) and
+    // the user-friendly wording reads as a destination, not an API path.
+    // Matches the 2026-05-24 design spec §6.6.
+    path: '/order-confirmation/:id',
+    name: 'order-confirmation',
+    component: () => import('@/components/OrderConfirmation.vue'),
+    props: true,
+    meta: { showNavbar: true }
   }
 ]
 
