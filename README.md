@@ -192,14 +192,14 @@ This project applies named software engineering principles to every tool and arc
 - [x] Monorepo structure (`/client`, `/server`)
 - [x] Express API + PostgreSQL schema
 - [x] JWT authentication (register, login, refresh)
-- [ ] Meals + orders endpoints
+- [x] Meals + orders endpoints
 - [ ] Stripe checkout + webhook
 
 **Phase 3 — Containerisation + CI/CD**
 - [x] Docker + docker-compose
-- [ ] GitHub Actions CI/CD
 
 **Future Enhancements**
+- [ ] GitHub Actions CI/CD
 - [ ] AI recipe chatbot (Anthropic API)
 - [ ] OAuth login (Google)
 - [ ] Stripe subscription billing
