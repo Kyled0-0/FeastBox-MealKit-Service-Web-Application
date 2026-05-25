@@ -29,8 +29,7 @@ export const useMealForm = defineStore('MealForm', {
         cvc:'',
         voucher:'',
         terms: false
-      },
-      successPayment: false
+      }
     }),
     getters:{
       totalServings: (state) => state.planData.serving * state.planData.mealPerWeek,
@@ -48,9 +47,6 @@ export const useMealForm = defineStore('MealForm', {
       },
       updatePayment(field,value){
         this.paymentData[field] = value;
-      },
-      updatePaymentStatus(status) {
-        this.successPayment = status;
       }
     }
     
