@@ -1,0 +1,16 @@
+# ClusterIP only: the DB is consumed by the api Deployment, never directly
+# by external clients. Public exposure of Postgres is a common production
+# breach vector.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432

@@ -1,0 +1,72 @@
+# StatefulSet (not Deployment) for stable pod name `postgres-0` so the api
+# can reference `postgres-service` and Kubernetes DNS resolves consistently.
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      # No pod-level runAsNonRoot: postgres:16-alpine needs root briefly
+      # during initdb (chown of /var/lib/postgresql/data) before dropping
+      # to the postgres user via gosu. Forcing runAsNonRoot crash-loops
+      # the pod on first boot.
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: feastbox
+            - name: POSTGRES_DB
+              value: feastbox
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: feastbox-secret
+                  key: POSTGRES_PASSWORD
+            # PGDATA in a subdir avoids the lost+found conflict on Docker
+            # Desktop hostpath PVCs.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "feastbox", "-d", "feastbox"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            # failureThreshold: 6 (api uses 3) because Postgres can stall
+            # briefly under fsync; generous threshold avoids losing
+            # in-flight transactions to a premature restart.
+            exec:
+              command: ["pg_isready", "-U", "feastbox", "-d", "feastbox"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-data

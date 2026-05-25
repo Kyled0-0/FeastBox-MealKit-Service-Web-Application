@@ -1,0 +1,11 @@
+# Non-sensitive runtime config. Loaded into the api Deployment via envFrom
+# alongside the Secret.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: feastbox-config
+data:
+  CLIENT_URL: "http://localhost:5173"
+  NODE_ENV: "production"
+  PORT: "3000"

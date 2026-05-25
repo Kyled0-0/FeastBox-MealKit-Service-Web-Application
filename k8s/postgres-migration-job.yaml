@@ -1,0 +1,31 @@
+# Runs `prisma migrate deploy` once per apply. Job (not init container) so
+# it runs once at deploy time, not on every pod restart.
+# NOT re-runnable by plain `kubectl apply` -- apply.sh deletes prior Job
+# with --ignore-not-found before re-applying.
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: feastbox-migrate
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: feastbox-migrate
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          # Same image as the api Deployment. imagePullPolicy: Never because
+          # Docker Desktop's kind containerd routes all pulls through a
+          # mirror that doesn't proxy custom registries; apply.sh loads the
+          # image into the node via `ctr import` before this Job applies.
+          image: docker.io/library/feastbox-api:latest
+          imagePullPolicy: Never
+          command: ["npx", "prisma", "migrate", "deploy"]
+          envFrom:
+            - configMapRef:
+                name: feastbox-config
+            - secretRef:
+                name: feastbox-secret

@@ -16,6 +16,15 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Kubernetes Secret with real values — only secret.example.yaml is tracked.
+k8s/secret.yaml
+
+# Personal demo reference (not part of the submission repo)
+DEMO_RUNBOOK.txt
+
+# Deakin assessment task brief (local-only reference)
+SIT226-7_2HD.md
+
 # Project docs and AI tooling — never commit to remote
 CLAUDE.md
 docs_foundation/

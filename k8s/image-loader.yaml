@@ -1,0 +1,27 @@
+# Temporary privileged pod used by apply.sh to load image tarballs into
+# the worker node's containerd content store via `ctr image import`.
+# Workaround for Docker Desktop kind: the cluster's containerd registry-
+# mirror does not proxy custom registries, so we bypass it by importing
+# directly. Deleted by apply.sh after the import.
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: image-loader
+spec:
+  nodeName: desktop-worker
+  hostPID: true
+  restartPolicy: Never
+  containers:
+    - name: loader
+      image: busybox
+      command: ["sleep", "3600"]
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - name: host
+          mountPath: /host
+  volumes:
+    - name: host
+      hostPath:
+        path: /

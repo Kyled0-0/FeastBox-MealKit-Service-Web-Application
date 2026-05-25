@@ -1,0 +1,15 @@
+# LoadBalancer so Docker Desktop auto-binds localhost:3000 (no
+# port-forwarding ceremony for the demo).
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: feastbox-api-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: feastbox-api
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

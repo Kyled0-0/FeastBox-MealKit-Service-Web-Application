@@ -1,0 +1,74 @@
+# 2 replicas baseline so HPA scale-up events are unambiguous in the demo.
+# imagePullPolicy: Never because Docker Desktop's kind containerd routes
+# pulls through a mirror that doesn't proxy custom registries; apply.sh
+# loads the image into the node via ctr import.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feastbox-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: feastbox-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: feastbox-api
+    spec:
+      containers:
+        - name: api
+          image: docker.io/library/feastbox-api:latest
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: feastbox-config
+            - secretRef:
+                name: feastbox-secret
+          # Resource requests/limits required by HPA: without them the
+          # autoscaler cannot compute "% of requested CPU used".
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          # Probes target /health which does NOT touch the DB: a DB outage
+          # must not kill api pods (readiness pulls traffic, liveness keeps
+          # the pod alive to recover when the DB returns).
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            # runAsUser: 1000 (the `node` user's UID in node:22-alpine).
+            # Required alongside runAsNonRoot because the Dockerfile's
+            # `USER node` is a non-numeric name the kubelet can't verify.
+            runAsUser: 1000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false  # Prisma writes to /tmp
+            capabilities:
+              drop: ["ALL"]

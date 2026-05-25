@@ -1,16 +1,6 @@
-# .dockerignore — exclusions for the API image build (Phase 3 Task 14).
-#
-# Two goals:
-# 1. Keep the build context small. Docker tars the context and uploads it
-#    to the daemon every build; node_modules alone is ~500 MB and would
-#    dominate transfer time. Excluding it forces the Dockerfile to run
-#    `npm ci` inside the image (which is what we want — reproducible).
-# 2. Prevent secrets from leaking into the image. .env files contain
-#    JWT_SECRET, DATABASE_URL etc. and MUST NOT ship in any layer. Even
-#    if a later layer "deletes" them, the previous layer keeps them
-#    forever in image history.
+# Keep the build context small and prevent secrets from leaking into image layers.
 
-# ─── Local dependencies and build outputs ──────────────────────────────────
+# Deps + build outputs
 node_modules
 **/node_modules
 dist
@@ -18,22 +8,19 @@ build
 .vite
 .cache
 
-# ─── Secrets and local environment overrides ───────────────────────────────
-# .env (any depth, any suffix) — server runtime env arrives via compose
-# env_file / K8s Secret + ConfigMap, NEVER via a baked-in .env layer.
+# Secrets (any depth, any suffix)
 .env
 .env.*
 **/.env
 **/.env.*
 
-# ─── Git and version control ───────────────────────────────────────────────
-# Smaller context + we never want commit metadata in a runtime image.
+# Git / VCS
 .git
 .gitignore
 .gitattributes
 .github
 
-# ─── IDE and OS detritus ───────────────────────────────────────────────────
+# IDE / OS
 .vscode
 .idea
 .DS_Store
@@ -41,10 +28,7 @@ Thumbs.db
 *.swp
 *.swo
 
-# ─── Local-only documentation and AI artefacts (per CLAUDE.md commit rules) ─
-# These are gitignored AND must not leak into a Docker image either —
-# the project bar treats them as production-equivalent secrets because
-# they contain architectural reasoning competitors could harvest.
+# Local-only docs and AI artefacts (per CLAUDE.md commit rules)
 CLAUDE.md
 docs_foundation
 docs/superpowers
@@ -54,11 +38,10 @@ Plan_ORG
 *.pkl
 feastbox-source-dump.txt
 memory
+SIT226-7_2HD.md
+DEMO_RUNBOOK.txt
 
-# ─── Test files (skip in the production image) ──────────────────────────────
-# Tests run on host via `npm --prefix server run test`, not in the runtime
-# image. Excluding them shaves a few MB and reduces the attack surface
-# (test fixtures sometimes hold credentials).
+# Tests (run on host, not in runtime image)
 **/*.test.js
 **/*.spec.js
 **/test-utils
@@ -67,22 +50,18 @@ coverage
 .nyc_output
 vitest.config.js
 
-# ─── Frontend source (this Dockerfile builds the API only) ──────────────────
-# The Vue SPA is served by Vite locally during the demo, not by Express.
-# Excluding /src and frontend tooling keeps the image focused.
+# Frontend tree (this Dockerfile builds the API only)
 src
 public
 index.html
 vite.config.js
 postcss.config.js
 tailwind.config.js
-# Root-anchored so only the repo-root manifests are excluded.
-# server/package.json and server/package-lock.json are NOT matched and
-# remain available for `COPY server/package.json ...` in the Dockerfile.
+# Root-anchored so server/package.json is not matched.
 ./package.json
 ./package-lock.json
 
-# ─── Compose and infra manifests (don't need them inside the image) ─────────
+# Compose / infra manifests
 docker-compose.yml
 docker-compose.*.yml
 Dockerfile
