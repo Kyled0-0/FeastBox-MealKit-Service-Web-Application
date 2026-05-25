@@ -1,19 +1,6 @@
-# k8s/postgres-service.yaml, ClusterIP for the Postgres pod.
-#
-# Why ClusterIP not LoadBalancer or NodePort:
-#   - The DB is consumed ONLY by the api Deployment, never directly by
-#     external clients. ClusterIP is the right principle-of-least-
-#     privilege default.
-#   - Exposing Postgres publicly is the most common production breach
-#     vector for stateful workloads (Shodan-discoverable, default
-#     creds, etc.). CLAUDE.md "What gets a PR rejected on sight" treats
-#     this as a junior-PR red flag.
-#
-# `serviceName: postgres-service` on the StatefulSet pairs with this
-# Service's name to give the pod its stable DNS entry: the api resolves
-# `postgres-service` (or `postgres-service.default.svc.cluster.local`
-# for the fully-qualified form) to this Service's ClusterIP, which load-
-# balances to the pod. With one replica, it's a direct route.
+# ClusterIP only: the DB is consumed by the api Deployment, never directly
+# by external clients. Public exposure of Postgres is a common production
+# breach vector.
 
 apiVersion: v1
 kind: Service

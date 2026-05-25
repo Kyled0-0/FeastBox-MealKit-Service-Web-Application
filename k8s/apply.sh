@@ -1,37 +1,27 @@
 #!/usr/bin/env bash
+# Orchestrated apply for the FeastBox K8s stack.
 #
-# k8s/apply.sh, orchestrated apply of the FeastBox K8s manifests.
+# Why this is a script (not raw `kubectl apply -f k8s/`):
+#   - The api Deployment must not start until Postgres is Ready AND the
+#     migration Job has completed; apply.sh enforces ordering with
+#     `kubectl wait`.
+#   - The migration Job is not re-runnable by plain `kubectl apply`
+#     (apply on a completed Job is a no-op); we delete first with
+#     --ignore-not-found.
+#   - Docker Desktop's kind containerd does not pull from custom
+#     registries; we `docker save` then `ctr import` the image into the
+#     worker node via a privileged loader pod.
 #
-# Why this script exists (instead of a single `kubectl apply -f k8s/`):
-# the manifests have ordering constraints that `apply -f` does not respect:
-#
-#   1. The api Deployment MUST NOT start until the Postgres pod is Ready
-#      AND the migration Job has completed, otherwise the api boots
-#      against an empty schema, crashes, restarts in a loop, and the
-#      demo recording shows ImagePullBackOff-style noise instead of a
-#      clean startup sequence.
-#
-#   2. The migration Job is NOT re-runnable by a plain `kubectl apply`.
-#      `apply` on a completed Job is a no-op. To re-run migrations on
-#      a second demo pass, the Job must be DELETED first (with
-#      `--ignore-not-found` so the first run does not error).
-#
-#   3. imagePullPolicy: Never on the api and migration Job means the
-#      image MUST exist locally before any `kubectl apply` that
-#      references it. The build step is enforced at the top of the
-#      script so a fresh checkout cannot accidentally apply a stale
-#      manifest set against a missing image.
-#
-# Run from the repo root:
-#   bash k8s/apply.sh
-#
-# Idempotent. Re-running is the supported workflow for re-applying
-# config changes.
+# Run from the repo root: `bash k8s/apply.sh`
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+IMAGE_TAG="feastbox-api:latest"
+
+# Git Bash on Windows mangles /host/... paths in kubectl exec/cp args.
+export MSYS_NO_PATHCONV=1
 
 echo "==> Preflight: docker, kubectl, cluster context"
 command -v docker >/dev/null || { echo "ERROR: docker not in PATH" >&2; exit 1; }
@@ -42,48 +32,49 @@ kubectl cluster-info >/dev/null 2>&1 || {
   exit 1
 }
 
-echo "==> Build feastbox-api:latest"
-# Build from the repo root so the Dockerfile's COPY server/ path resolves.
-# Tag MUST be `:latest` to match imagePullPolicy: Never in api-deployment
-# and postgres-migration-job manifests.
-(cd "$REPO_ROOT" && docker build -t feastbox-api:latest .)
-
-echo "==> Verify k8s/secret.yaml exists (copy from secret.example.yaml first if not)"
+echo "==> Verify k8s/secret.yaml exists"
 if [[ ! -f "$SCRIPT_DIR/secret.yaml" ]]; then
   echo "ERROR: $SCRIPT_DIR/secret.yaml not found." >&2
-  echo "Copy the template and fill in real values:" >&2
   echo "  cp $SCRIPT_DIR/secret.example.yaml $SCRIPT_DIR/secret.yaml" >&2
   echo "  # edit secret.yaml: POSTGRES_PASSWORD, JWT_SECRET, JWT_REFRESH_SECRET, DATABASE_URL" >&2
   exit 1
 fi
 
-echo "==> Delete any prior migration Job (apply on a completed Job is a no-op)"
-# `--ignore-not-found` makes the first run safe. Subsequent runs need
-# the explicit deletion so the new Job actually executes.
-kubectl delete job feastbox-migrate --ignore-not-found
+echo "==> Build ${IMAGE_TAG}"
+(cd "$REPO_ROOT" && docker build -t "${IMAGE_TAG}" .)
+
+echo "==> Save image to tarball for ctr import"
+docker save "${IMAGE_TAG}" -o /tmp/feastbox-api.tar
 
 echo "==> Apply Secret + ConfigMap"
 kubectl apply -f "$SCRIPT_DIR/secret.yaml"
 kubectl apply -f "$SCRIPT_DIR/configmap.yaml"
+
+echo "==> Apply in-cluster Container Registry (ULO evidence resource)"
+kubectl apply -f "$SCRIPT_DIR/registry.yaml"
+
+echo "==> Load image into worker node containerd"
+kubectl delete pod image-loader --ignore-not-found --force --grace-period=0 2>/dev/null || true
+kubectl apply -f "$SCRIPT_DIR/image-loader.yaml"
+kubectl wait pod/image-loader --for=condition=Ready --timeout=60s
+echo "    copying tarball (~142 MB)..."
+(cd /tmp && kubectl cp ./feastbox-api.tar image-loader:/host/tmp/feastbox-api.tar)
+kubectl exec image-loader -- sh -c 'chroot /host ctr -n=k8s.io image import /tmp/feastbox-api.tar'
+kubectl delete pod image-loader --ignore-not-found --force --grace-period=0
 
 echo "==> Apply Postgres (PVC + Service + StatefulSet)"
 kubectl apply -f "$SCRIPT_DIR/postgres-pvc.yaml"
 kubectl apply -f "$SCRIPT_DIR/postgres-service.yaml"
 kubectl apply -f "$SCRIPT_DIR/postgres-statefulset.yaml"
 
-echo "==> Wait for Postgres pod to be Ready (timeout 120s)"
-# The api Deployment depends on this. `condition=Ready` checks the
-# readiness probe (`pg_isready -d feastbox`), not just pod-Running,
-# so we know the DB actually accepts queries before proceeding.
+echo "==> Wait for Postgres pod Ready (timeout 120s)"
 kubectl wait --for=condition=Ready pod/postgres-0 --timeout=120s
 
-echo "==> Apply Migration Job"
+echo "==> Re-create Migration Job"
+kubectl delete job feastbox-migrate --ignore-not-found
 kubectl apply -f "$SCRIPT_DIR/postgres-migration-job.yaml"
 
-echo "==> Wait for Migration Job to complete (timeout 120s)"
-# `condition=complete` is the canonical Job-finished signal. If
-# migrations fail, the Job stays Active and this wait times out;
-# `kubectl logs job/feastbox-migrate` is the next debugging step.
+echo "==> Wait for Migration Job complete (timeout 120s)"
 kubectl wait --for=condition=complete job/feastbox-migrate --timeout=120s
 
 echo "==> Apply API (Deployment + Service + HPA)"
@@ -91,26 +82,21 @@ kubectl apply -f "$SCRIPT_DIR/api-deployment.yaml"
 kubectl apply -f "$SCRIPT_DIR/api-service.yaml"
 kubectl apply -f "$SCRIPT_DIR/api-hpa.yaml"
 
-echo "==> Wait for API rollout to complete (timeout 120s)"
-# Rollout-status blocks until all replicas of the new ReplicaSet are
-# Available. Combined with the readiness probe on /health, this means
-# the LoadBalancer is routing traffic by the time the script exits.
+echo "==> Wait for API rollout (timeout 120s)"
 kubectl rollout status deployment/feastbox-api --timeout=120s
 
 echo ""
 echo "==> Done. Quick verification:"
 echo "    curl http://localhost:3000/health         # expect 200"
-echo "    curl http://localhost:3000/meals          # expect 8 meals"
+echo "    curl http://localhost:3000/meals          # expect [] until seeded"
 echo "    kubectl get pods                          # all Running"
-echo "    kubectl describe deployment feastbox-api  # probes config"
-echo "    kubectl get hpa                           # baseline replicas"
+echo "    kubectl describe deployment feastbox-api  # probes visible"
+echo "    kubectl get hpa                           # real CPU %"
 echo ""
-echo "==> Seed step (run ONCE per fresh DB, from Git Bash or WSL, not PowerShell):"
+echo "==> Seed step (run ONCE per fresh DB, from Git Bash or WSL):"
 echo "    kubectl run feastbox-seed --rm -i --restart=Never \\"
-echo "        --image=feastbox-api:latest \\"
-echo "        --overrides='{\"spec\":{\"containers\":[{\"name\":\"seed\",\"image\":\"feastbox-api:latest\",\"imagePullPolicy\":\"Never\",\"command\":[\"node\",\"prisma/seed.js\"],\"envFrom\":[{\"secretRef\":{\"name\":\"feastbox-secret\"}}]}]}}'"
+echo "        --image=docker.io/library/feastbox-api:latest \\"
+echo "        --overrides='{\"spec\":{\"containers\":[{\"name\":\"seed\",\"image\":\"docker.io/library/feastbox-api:latest\",\"imagePullPolicy\":\"Never\",\"command\":[\"node\",\"prisma/seed.js\"],\"env\":[{\"name\":\"NODE_ENV\",\"value\":\"development\"}],\"envFrom\":[{\"secretRef\":{\"name\":\"feastbox-secret\"}}]}]}}'"
 echo ""
-echo "    Note: --overrides supplies the full container spec including image"
-echo "    and imagePullPolicy, so the outer --image flag is the kubectl-"
-echo "    required placeholder (it picks the container name) and the"
-echo "    overrides JSON wins for everything else."
+echo "    NODE_ENV=development override required: seed.js refuses to run"
+echo "    when NODE_ENV=production (which the ConfigMap sets)."

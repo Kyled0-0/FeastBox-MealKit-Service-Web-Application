@@ -1,32 +1,7 @@
-# k8s/postgres-migration-job.yaml, runs `prisma migrate deploy` once.
-#
-# Why a Job not an init container on the api Deployment:
-#   - The Job runs once per `kubectl apply` and is trackable with
-#     `kubectl wait --for=condition=complete`. apply.sh uses this to
-#     gate the api Deployment apply, no API pod starts until the
-#     schema is current.
-#   - An init container would re-run on every pod restart (including
-#     HPA scale-up), which is wasted work and could race when multiple
-#     pods boot simultaneously.
-#   - A standalone Job is also closer to the "run-once" semantics that
-#     the next maintainer would expect for a migration. Junior PRs
-#     often conflate "migration" with "startup hook" and get bitten by
-#     the pod-restart-loop.
-#
-# Why this Job is NOT re-runnable by simple re-apply:
-#   - `kubectl apply` on a Job whose previous run completed is a no-op.
-#     apply.sh deletes any existing Job (`--ignore-not-found`) before
-#     applying so the second demo run re-runs migrations.
-#   - This is the single biggest foot-gun in K8s-managed migrations.
-#     The deletion step in apply.sh is load-bearing; skip it and the
-#     second run silently skips migrations + the api boots against
-#     stale schema.
-#
-# `restartPolicy: Never` matches Job semantics, if migrations fail,
-# the pod stays in Error state for `kubectl logs`-driven debugging
-# instead of looping. backoffLimit: 0 disables retries; a failed
-# migration should not be retried automatically because the failure
-# mode is usually "drift", not "transient".
+# Runs `prisma migrate deploy` once per apply. Job (not init container) so
+# it runs once at deploy time, not on every pod restart.
+# NOT re-runnable by plain `kubectl apply` -- apply.sh deletes prior Job
+# with --ignore-not-found before re-applying.
 
 apiVersion: batch/v1
 kind: Job
@@ -42,26 +17,15 @@ spec:
       restartPolicy: Never
       containers:
         - name: migrate
-          # SAME image as the api Deployment, Prisma CLI lives in
-          # dependencies (`server/package.json:40`, moved there 2026-05-21
-          # for Render deploy; the move pays off here too). The
-          # imagePullPolicy: Never instructs K8s to use the local cache;
-          # `docker build` (or `docker compose build api`) must have
-          # produced `feastbox-api:latest` before this Job is applied.
-          # apply.sh enforces the build step explicitly.
-          image: feastbox-api:latest
+          # Same image as the api Deployment. imagePullPolicy: Never because
+          # Docker Desktop's kind containerd routes all pulls through a
+          # mirror that doesn't proxy custom registries; apply.sh loads the
+          # image into the node via `ctr import` before this Job applies.
+          image: docker.io/library/feastbox-api:latest
           imagePullPolicy: Never
           command: ["npx", "prisma", "migrate", "deploy"]
-          # envFrom mirrors the api Deployment's shape: ConfigMap first
-          # then Secret. `prisma migrate deploy` only reads DATABASE_URL
-          # (from the Secret) today, but if a future migration script or
-          # the seed binary ever references NODE_ENV or PORT, having the
-          # ConfigMap already wired prevents a confusing "undefined env
-          # var" failure at run time. Two lines of defensive symmetry.
           envFrom:
             - configMapRef:
                 name: feastbox-config
             - secretRef:
                 name: feastbox-secret
-          # No resource requests, the migrate Job runs briefly and the
-          # HPA does not target it. Defaults are fine for a 200ms job.

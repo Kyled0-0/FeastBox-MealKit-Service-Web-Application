@@ -1,18 +1,5 @@
-# k8s/api-service.yaml, LoadBalancer for the api Deployment.
-#
-# Why LoadBalancer not NodePort or Ingress:
-#   - Docker Desktop's K8s automatically binds LoadBalancer services to
-#     localhost on the host, so `curl http://localhost:3000/health`
-#     reaches the cluster with no port-forwarding ceremony. NodePort
-#     would expose on a high-numbered ephemeral port (30000-32767) and
-#     require `kubectl get svc` to discover the port number, fine for
-#     CI but bad for a live demo recording.
-#   - Ingress requires an ingress controller (nginx-ingress, traefik)
-#     installed cluster-wide, which is beyond the assessed setup.
-#
-# port 3000 -> targetPort 3000: identical so the frontend dev server's
-# `.env.local` line `VITE_API_URL=http://localhost:3000` works without
-# modification across compose and K8s.
+# LoadBalancer so Docker Desktop auto-binds localhost:3000 (no
+# port-forwarding ceremony for the demo).
 
 apiVersion: v1
 kind: Service

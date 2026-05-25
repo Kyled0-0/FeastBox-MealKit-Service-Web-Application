@@ -1,0 +1,460 @@
+================================================================================
+FEASTBOX -- SIT226 HD DEMONSTRATION SCRIPT
+================================================================================
+
+Format: each step shows the COMMAND to run, the EXPECTED output, and the
+SAY line (what to narrate on camera). Run from Git Bash or WSL on
+Windows. Open this file in a second window during the recording.
+
+For full troubleshooting, see comments in k8s/*.yaml and apply.sh.
+
+================================================================================
+PART A -- PRE-RECORDING SETUP (NOT on camera)
+================================================================================
+
+--------------------------------------------------------------------------------
+A.1 -- Enable Docker Desktop Kubernetes
+--------------------------------------------------------------------------------
+
+ACTION:    Docker Desktop > Settings > Kubernetes > tick "Enable Kubernetes"
+           > Apply & Restart. Wait for the bottom-left green dot.
+
+VERIFY:    kubectl cluster-info
+EXPECTED:  "Kubernetes control plane is running at https://127.0.0.1:..."
+
+--------------------------------------------------------------------------------
+A.2 -- Install metrics-server (one-time per cluster)
+--------------------------------------------------------------------------------
+
+COMMAND:
+    kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+    kubectl patch deployment metrics-server -n kube-system --type=json \
+        -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
+
+    kubectl wait deployment/metrics-server -n kube-system \
+        --for=condition=Available --timeout=120s
+
+VERIFY:    kubectl top nodes
+EXPECTED:  Real CPU(cores) and MEMORY(bytes) figures, not "Metrics API not
+           available".
+
+WHY:       HPA needs CPU metrics. Docker Desktop's self-signed kubelet
+           certs require --kubelet-insecure-tls.
+
+--------------------------------------------------------------------------------
+A.3 -- Generate k8s/secret.yaml (gitignored)
+--------------------------------------------------------------------------------
+
+COMMAND:
+    JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
+    JWT_REFRESH_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
+    POSTGRES_PASSWORD=$(node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))")
+
+    cat > k8s/secret.yaml <<EOF
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: feastbox-secret
+    type: Opaque
+    stringData:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_URL: postgresql://feastbox:${POSTGRES_PASSWORD}@postgres-service:5432/feastbox
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+    EOF
+
+VERIFY:    git check-ignore -v k8s/secret.yaml
+EXPECTED:  ".gitignore:20:k8s/secret.yaml    k8s/secret.yaml"
+
+--------------------------------------------------------------------------------
+A.4 -- Deploy the stack
+--------------------------------------------------------------------------------
+
+COMMAND:   bash k8s/apply.sh
+
+EXPECTED:  Script prints "==>" lines for each stage, ends with "Done."
+           First run ~5-8 min (image build + image-load to kind node),
+           re-runs ~90-120 s.
+
+WHY THIS TAKES MULTIPLE STEPS:
+    Docker Desktop's kind-based K8s runs an internal containerd registry-
+    mirror that only proxies known public registries (docker.io, gcr.io).
+    Custom registries (in-cluster or host.docker.internal) return 500
+    from the mirror with no override. apply.sh handles this by:
+
+      1. Building the image with `docker build`.
+      2. `docker save` -> tarball.
+      3. Apply a privileged image-loader Pod with hostPath /.
+      4. kubectl cp the tarball into the loader pod's /host/tmp.
+      5. `chroot /host ctr -n=k8s.io image import` to load the image
+         into the node's containerd content store.
+      6. Delete the loader pod.
+      7. Apply the rest of the manifests; api Deployment + Migration
+         Job use `image: docker.io/library/feastbox-api:latest` with
+         `imagePullPolicy: Never` to skip the mirror entirely.
+
+    The in-cluster Container Registry (registry.yaml) is still deployed
+    as an HD-evidence resource (ULO1: distinct cloud resource visible
+    in `kubectl get all`; ULO4: represents the build-tag-push-pull
+    lifecycle) but is NOT used as the actual pull source for this
+    Docker-Desktop-specific environment. Production K8s clusters would
+    pull from the registry directly.
+
+--------------------------------------------------------------------------------
+A.5 -- Seed the database (one-time per fresh DB)
+--------------------------------------------------------------------------------
+
+COMMAND:   (Git Bash / WSL, NOT PowerShell)
+    kubectl run feastbox-seed --rm -i --restart=Never \
+        --image=docker.io/library/feastbox-api:latest \
+        --overrides='{"spec":{"containers":[{"name":"seed","image":"docker.io/library/feastbox-api:latest","imagePullPolicy":"Never","command":["node","prisma/seed.js"],"env":[{"name":"NODE_ENV","value":"development"}],"envFrom":[{"secretRef":{"name":"feastbox-secret"}}]}]}}'
+
+EXPECTED:  "Seeded 8 meals."
+
+NOTES:
+    - NODE_ENV=development override is REQUIRED. The seed has a
+      production guard (server/prisma/seed.js refuses NODE_ENV=production)
+      and the ConfigMap sets NODE_ENV=production for the api Deployment.
+    - Image name is fully qualified `docker.io/library/feastbox-api:
+      latest` because that is how ctr stored it during the image-load
+      step in A.4. Short tags (`feastbox-api:latest`) may or may not
+      resolve depending on containerd's default registry config.
+
+--------------------------------------------------------------------------------
+A.6 -- Final pre-recording smoke test
+--------------------------------------------------------------------------------
+
+COMMAND:
+    curl http://localhost:3000/health
+    curl -s http://localhost:3000/meals | python -c "import json,sys; print(f'meals={len(json.load(sys.stdin))}')"
+    kubectl get pods
+    kubectl get hpa
+
+EXPECTED:
+    {"status":"ok"}
+    meals=8
+    All pods Running (api x2, postgres-0, feastbox-migrate Completed)
+    HPA TARGETS shows a real % (e.g. "1%/60%"), NOT <unknown>
+
+If any line fails, STOP and fix before recording. The recording cannot
+be edited to hide a mid-demo failure.
+
+--------------------------------------------------------------------------------
+A.7 -- Open four terminals for the recording
+--------------------------------------------------------------------------------
+
+T1: kubectl commands (Parts B.1, B.2, B.3, B.6, B.7)
+T2: Load test loop (Part B.4)
+T3: kubectl get hpa -w (Part B.4 watch)
+T4: npm run dev (Part B.5)
+
+Resize and position so all four are visible if possible, or alt-tab
+between them with screen-recording capture set to "entire screen".
+
+================================================================================
+PART B -- RECORDING SCRIPT (ON camera, ~10-12 minutes)
+================================================================================
+
+--------------------------------------------------------------------------------
+B.0 -- Open ("Cold open", ~30 seconds)
+--------------------------------------------------------------------------------
+
+ACTION:    Show the FeastBox repo open in your editor. Skim the
+           directory tree briefly so the assessor sees src/, server/,
+           k8s/.
+
+SAY:
+    "This is FeastBox, a meal-kit ordering app deployed to Docker
+     Desktop Kubernetes. Vue 3 frontend, Express + Prisma backend,
+     PostgreSQL database. I'm going to walk through the four ULOs:
+     cloud resources, orchestration, business impact, and the devops
+     lifecycle."
+
+--------------------------------------------------------------------------------
+B.1 -- ULO1: Cloud resources
+--------------------------------------------------------------------------------
+
+[T1] COMMAND:
+    kubectl get all,secret,configmap,pvc
+
+EXPECTED:  Lists Pods (api x2 + postgres-0 + registry), Services x3
+           (postgres-service, feastbox-api-service, registry-service),
+           Deployments x2 (feastbox-api, registry), StatefulSet, Job,
+           HPA, Secret, ConfigMap, PVC.
+
+SAY:
+    "Nine distinct Kubernetes resource kinds in one stack. The Secret
+     holds JWT signing keys and the Postgres password. The ConfigMap
+     holds non-sensitive runtime config like CLIENT_URL and NODE_ENV.
+     The PersistentVolumeClaim requests 1 gibibyte of storage backed
+     by Docker Desktop's hostpath provisioner. There is also a
+     Container Registry deployed as a NodePort Service -- in a
+     production cluster this would be the pull source for our image,
+     completing the build-tag-push-pull devops lifecycle. Splitting
+     Secret from ConfigMap follows the Kubernetes principle of least
+     privilege: non-sensitive config can be updated without re-applying
+     credentials."
+
+--------------------------------------------------------------------------------
+B.2 -- ULO2: Orchestration -- pods + probes
+--------------------------------------------------------------------------------
+
+[T1] COMMAND:
+    kubectl get pods
+
+EXPECTED:  feastbox-api-* x2 Running, postgres-0 Running,
+           feastbox-migrate-* Completed.
+
+SAY:
+    "Two API replicas as the baseline. One Postgres pod managed by a
+     StatefulSet -- that gives us a stable DNS name, postgres-0,
+     which the API references in its DATABASE_URL. And the migration
+     Job has Completed -- it ran prisma migrate deploy once at startup
+     and exited. That's the run-once pattern: a Job, not an init
+     container, because init containers re-run on every pod restart."
+
+[T1] COMMAND:
+    kubectl describe deployment feastbox-api
+
+ACTION:    Scroll to the "Containers > api" section. Pause on the
+           Liveness and Readiness lines.
+
+EXPECTED:
+    Liveness:   http-get http://:http/health delay=30s timeout=5s ...
+    Readiness:  http-get http://:http/health delay=5s timeout=3s ...
+
+SAY:
+    "Both probes target the /health endpoint. /health returns 200
+     immediately with no database call -- that's intentional. A
+     database outage must not kill API pods. The readiness probe
+     pulls traffic from the LoadBalancer; the liveness probe only
+     fires on a hung process. Decoupling probes from the DB is
+     a textbook resilience pattern."
+
+--------------------------------------------------------------------------------
+B.3 -- ULO2: Orchestration -- HPA baseline
+--------------------------------------------------------------------------------
+
+[T1] COMMAND:
+    kubectl get hpa
+
+EXPECTED:
+    NAME              REFERENCE                 TARGETS    MIN  MAX  REPLICAS
+    feastbox-api-hpa  Deployment/feastbox-api   1%/60%     2    5    2
+
+SAY:
+    "The HorizontalPodAutoscaler. Min two, max five replicas. Trigger
+     at 60% average CPU utilisation, measured by metrics-server. We
+     start at two replicas deliberately -- if we started at one, the
+     scale-up to two could look like a fluke on camera. Starting at
+     two makes the scale event unambiguous."
+
+--------------------------------------------------------------------------------
+B.4 -- ULO2: Orchestration -- autoscaling under load
+--------------------------------------------------------------------------------
+
+[T2] COMMAND (background load):
+    for i in $(seq 1 500); do curl -s http://localhost:3000/meals > /dev/null & done
+
+[T3] COMMAND (watch the HPA):
+    kubectl get hpa -w
+
+EXPECTED OVER 30-60 SECONDS:
+    feastbox-api-hpa  1%/60%     2
+    feastbox-api-hpa  65%/60%    2
+    feastbox-api-hpa  120%/60%   2
+    feastbox-api-hpa  120%/60%   4    <-- scale-up
+    feastbox-api-hpa  85%/60%    4
+    feastbox-api-hpa  60%/60%    5    <-- max
+
+SAY:
+    "I'm firing 500 concurrent requests at the LoadBalancer. Watch
+     the TARGETS column -- the API's CPU utilisation climbs past
+     60%. The HPA sees that, and within seconds it scales from
+     two replicas to four, then to five. That's horizontal pod
+     autoscaling driven by live metrics. When the load drops, the
+     HPA's stabilization window prevents thrashing and replicas
+     scale back to the minimum of two."
+
+[T1] COMMAND (confirm replicas):
+    kubectl get pods -l app=feastbox-api
+
+EXPECTED:  Up to 5 feastbox-api-* pods Running.
+
+--------------------------------------------------------------------------------
+B.5 -- ULO3: Frontend hitting the cluster
+--------------------------------------------------------------------------------
+
+[T4] COMMAND:
+    echo "VITE_API_URL=http://localhost:3000" > .env.local
+    npm run dev
+
+ACTION:    Open http://localhost:5173/menu in a browser.
+           Open DevTools > Network tab.
+
+EXPECTED:  Meal grid loads 8 meal cards. Network tab shows GET
+           http://localhost:3000/meals returning 200.
+
+SAY:
+    "And here's the frontend. The Vue dev server is running on
+     localhost:5173, but it's pointed at the cluster's LoadBalancer
+     at localhost:3000. Every meal card you see is fetched from the
+     API Deployment, served through the LoadBalancer, queried from
+     the Postgres StatefulSet. Frontend on the host, API on
+     Kubernetes, database on a StatefulSet -- complete stateful
+     workload orchestration."
+
+--------------------------------------------------------------------------------
+B.6 -- ULO3: Business impact -- authenticated order write
+--------------------------------------------------------------------------------
+
+[T1] COMMAND (acquire JWT):
+    TOKEN=$(curl -s -X POST http://localhost:3000/auth/register \
+        -H "Content-Type: application/json" \
+        -d '{"email":"demo@feastbox.local","password":"demo_password_12"}' \
+        | python -c "import json,sys; print(json.load(sys.stdin)['accessToken'])")
+    echo "Token: ${TOKEN:0:40}..."
+
+EXPECTED:  Token starts with "eyJhbGciOiJIUzI1NiI..." (JWT header).
+
+[T1] COMMAND (place an order):
+    curl -X POST http://localhost:3000/orders \
+        -H "Authorization: Bearer $TOKEN" \
+        -H "Content-Type: application/json" \
+        -d '{"servings":4,"voucher":"FEAST20"}'
+
+EXPECTED:
+    {"id":"clx...","totalCents":2236,"status":"pending","createdAt":"2026-...","items":[...]}
+
+SAY:
+    "I'm registering a user, getting back a JWT access token, and
+     using it to place an order. Notice I send only servings and a
+     voucher code -- the server picks the box product, looks up the
+     price from the database, applies the FEAST20 discount server-
+     side, and persists the order. The client never controls the
+     total."
+
+[T1] COMMAND (show the row in Postgres):
+    kubectl exec postgres-0 -- psql -U feastbox -d feastbox -c \
+        'SELECT id, "totalCents", status FROM "Order" ORDER BY "createdAt" DESC LIMIT 1;'
+
+EXPECTED:  One row, status "pending", totalCents matching the response.
+
+SAY:
+    "And there's the row, persisted inside the StatefulSet's
+     PersistentVolume. That's our ULO3 business impact path:
+     authenticated, server-authoritative writes against a stateful
+     workload."
+
+--------------------------------------------------------------------------------
+B.7 -- ULO4: DevOps lifecycle
+--------------------------------------------------------------------------------
+
+ACTION:    Open k8s/apply.sh in the editor. Scroll through it briefly.
+
+SAY:
+    "And finally ULO4, the devops lifecycle. The entire deployment
+     is codified in apply.sh. It builds the Docker image, validates
+     the Secret exists, deletes the prior migration Job because a
+     completed Job is a no-op on re-apply, then applies Secret and
+     ConfigMap, then Postgres, waits for Postgres to be Ready,
+     then runs the migration Job, waits for it to Complete, then
+     applies the API Deployment, Service, and HPA. Eleven ordered
+     stages with explicit waits between them. Idempotent re-runs.
+     That's the deploy lifecycle, in one bash script."
+
+[T1] COMMAND (final resource picture):
+    kubectl get all,secret,configmap,pvc
+
+SAY:
+    "And that's the FeastBox cloud automation demo: four ULOs,
+     eight resource kinds, two-to-five autoscaled replicas, one
+     apply.sh script. Thank you."
+
+STOP RECORDING.
+
+================================================================================
+PART C -- POST-RECORDING
+================================================================================
+
+--------------------------------------------------------------------------------
+C.1 -- Submission package
+--------------------------------------------------------------------------------
+
+ACTION:    Create a ZIP containing:
+             - k8s/*.yaml (10 files)
+             - k8s/apply.sh
+             - Dockerfile
+             - docker-compose.yml
+             - DEMO_RUNBOOK.txt (this file)
+             - One-page outline document (separate)
+           Total ~30 KB. Do NOT include k8s/secret.yaml.
+
+--------------------------------------------------------------------------------
+C.2 -- Teardown
+--------------------------------------------------------------------------------
+
+COMMAND (if you want to free the cluster):
+    kubectl delete -f k8s/api-hpa.yaml -f k8s/api-service.yaml -f k8s/api-deployment.yaml
+    kubectl delete job feastbox-migrate
+    kubectl delete -f k8s/postgres-statefulset.yaml -f k8s/postgres-service.yaml -f k8s/postgres-pvc.yaml
+    kubectl delete -f k8s/configmap.yaml -f k8s/secret.yaml
+
+OR nuke everything:
+    kubectl delete all,pvc,configmap,secret --all
+
+OR disable Kubernetes entirely in Docker Desktop Settings.
+
+================================================================================
+ULO MAPPING -- QUICK REFERENCE FOR THE OUTLINE DOC
+================================================================================
+
+ULO1 -- Cloud resources
+    Secret (4 keys) + ConfigMap (3 keys) + PVC (1Gi) are distinct
+    resource kinds. Demonstrated in B.1.
+
+ULO2 -- Orchestration of stateful workloads
+    StatefulSet + Deployment + HPA + Migration Job. Demonstrated
+    across B.2 (probes), B.3 (HPA baseline), B.4 (autoscaling).
+
+ULO3 -- Business impact
+    Authenticated POST /orders, server-side total computation,
+    IDOR-safe GET /orders/:id, persisted in StatefulSet Postgres.
+    Demonstrated in B.5 (frontend) and B.6 (curl + psql).
+
+ULO4 -- DevOps lifecycle
+    apply.sh: 11 ordered stages, explicit waits, idempotent re-runs,
+    one-line teardown. Demonstrated in B.7.
+
+================================================================================
+TROUBLESHOOTING (if something breaks during the recording)
+================================================================================
+
+"ImagePullBackOff" on feastbox-api pods:
+    docker build -t feastbox-api:latest .
+    kubectl rollout restart deployment/feastbox-api
+
+HPA shows "<unknown>/60%":
+    Re-run Part A.2 (metrics-server).
+
+pod/postgres-0 stuck CrashLoopBackOff:
+    kubectl logs postgres-0     # look for Permission denied
+    kubectl describe pvc postgres-data    # check Events
+
+feastbox-migrate Job fails:
+    kubectl logs job/feastbox-migrate
+    Most likely: DATABASE_URL doesn't match POSTGRES_PASSWORD.
+    Re-run Part A.3.
+
+curl localhost:3000/health "Connection refused":
+    kubectl get svc feastbox-api-service    # EXTERNAL-IP should be localhost
+    kubectl get pods -l app=feastbox-api    # at least one 1/1 Ready
+    If Service stuck Pending, restart Docker Desktop.
+
+curl /meals returns []:
+    Re-run Part A.5 (seed).
+
+================================================================================
+END
+================================================================================

@@ -1,17 +1,7 @@
-# k8s/api-deployment.yaml, Express API workload.
-#
-# 2 replicas baseline so the HPA has somewhere to scale FROM. With a
-# single replica baseline, the demo recording cannot show "replicas
-# went from N to N+M under load" because N=1 + the scale-up to 2 looks
-# like a fluke. Starting at 2 makes the scale event unambiguous on
-# camera.
-#
-# Image: `feastbox-api:latest` matches what `docker compose build api`
-# produces. imagePullPolicy: Never tells K8s to use Docker Desktop's
-# local image cache (which is shared with the docker daemon). Without
-# this, K8s tries to pull from docker.io/library/feastbox-api and fails
-# with ImagePullBackOff, the most common foot-gun for first-time Docker
-# Desktop K8s users.
+# 2 replicas baseline so HPA scale-up events are unambiguous in the demo.
+# imagePullPolicy: Never because Docker Desktop's kind containerd routes
+# pulls through a mirror that doesn't proxy custom registries; apply.sh
+# loads the image into the node via ctr import.
 
 apiVersion: apps/v1
 kind: Deployment
@@ -25,8 +15,6 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      # During a rollout, never let pod count drop below 1, otherwise
-      # the LoadBalancer Service routes to nothing and the demo blips.
       maxUnavailable: 1
       maxSurge: 1
   template:
@@ -36,26 +24,18 @@ spec:
     spec:
       containers:
         - name: api
-          image: feastbox-api:latest
+          image: docker.io/library/feastbox-api:latest
           imagePullPolicy: Never
           ports:
             - name: http
               containerPort: 3000
           envFrom:
-            # Secret + ConfigMap merge into a flat env namespace. Order
-            # matters when keys collide (later wins), by convention,
-            # Secrets come AFTER ConfigMaps so a secret can override a
-            # default. Today there is no key collision, but the
-            # convention matters for future contributors.
             - configMapRef:
                 name: feastbox-config
             - secretRef:
                 name: feastbox-secret
-          # Resource requests/limits are required by HPA, without them
-          # the autoscaler cannot compute "% of requested CPU used" and
-          # the scale event never fires. The numbers are conservative
-          # so a single Docker Desktop node can host 5 replicas (the
-          # HPA max) without CPU pressure.
+          # Resource requests/limits required by HPA: without them the
+          # autoscaler cannot compute "% of requested CPU used".
           resources:
             requests:
               cpu: 100m
@@ -63,11 +43,9 @@ spec:
             limits:
               cpu: 500m
               memory: 256Mi
-          # Probes target GET /health which returns immediately with
-          # { status: 'ok' } and does NOT touch the DB. Intentional
-          # decoupling: a DB outage MUST NOT kill api pods (readiness
-          # probe pulls traffic, liveness keeps the pod alive so it
-          # can recover when the DB comes back).
+          # Probes target /health which does NOT touch the DB: a DB outage
+          # must not kill api pods (readiness pulls traffic, liveness keeps
+          # the pod alive to recover when the DB returns).
           readinessProbe:
             httpGet:
               path: /health
@@ -80,19 +58,15 @@ spec:
             httpGet:
               path: /health
               port: http
-            # Longer initialDelaySeconds for liveness so a slow boot
-            # never gets killed mid-startup. The readiness probe gates
-            # traffic; liveness only fires on a hung process.
             initialDelaySeconds: 30
             periodSeconds: 15
             timeoutSeconds: 5
             failureThreshold: 3
-          # Non-root user is baked into the Dockerfile (USER node), so
-          # no securityContext override needed here. Repeating the
-          # constraint as a runAsNonRoot guard would be belt-and-braces
-          # if the image ever changed, added below for defence in
-          # depth.
           securityContext:
+            # runAsUser: 1000 (the `node` user's UID in node:22-alpine).
+            # Required alongside runAsNonRoot because the Dockerfile's
+            # `USER node` is a non-numeric name the kubelet can't verify.
+            runAsUser: 1000
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false  # Prisma writes to /tmp

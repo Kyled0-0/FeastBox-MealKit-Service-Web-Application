@@ -1,20 +1,7 @@
-# k8s/api-hpa.yaml, HorizontalPodAutoscaler for the api Deployment.
-#
-# Targets the api Deployment between 2 and 5 replicas when average CPU
-# utilisation exceeds 60% of the requested 100m per pod (i.e. ~60m
-# absolute). This is intentionally conservative: a 200-request curl
-# loop with `Authorization: Bearer <token>` hitting `/orders` will
-# trigger scale-up on camera within ~30-60 seconds.
-#
-# Why this matters for ULO2 evidence:
-#   - The HD demo recording must SHOW autoscaling, not just declare it
-#     in a YAML. `kubectl get hpa -w` watched against a background
-#     `for i in $(seq 1 200); do curl ...; done &` is the standard
-#     reproducible demonstration. The threshold is what makes it visible.
-#
-# autoscaling/v2 (not v1): v2 supports multiple metrics + the explicit
-# `Resource` source kind. v1 only supports a single CPU target and is
-# functionally deprecated.
+# Scales the api Deployment 2-5 replicas at 60% CPU. Requires
+# metrics-server installed in the cluster (see DEMO_RUNBOOK.txt step A.2).
+# stabilizationWindowSeconds: 0 on scale-up so scale events appear quickly
+# in the demo (default 5-minute window would hide them).
 
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -33,15 +20,8 @@ spec:
         name: cpu
         target:
           type: Utilization
-          # 60% of the 100m CPU request = ~60m. Anything beyond that
-          # triggers a scale-up. The metrics-server (one-time install
-          # per Task 16) is what makes this number visible to the HPA;
-          # without it, `kubectl get hpa` shows `<unknown>/60%`.
           averageUtilization: 60
   behavior:
-    # Default scaling behaviour is overly conservative (5-minute
-    # stabilisation window). Tighten so the demo recording shows
-    # scale-up within the time of a single load-test sentence.
     scaleUp:
       stabilizationWindowSeconds: 0
       policies:

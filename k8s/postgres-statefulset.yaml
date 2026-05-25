@@ -1,20 +1,5 @@
-# k8s/postgres-statefulset.yaml, Postgres 16 stateful workload.
-#
-# Why StatefulSet not Deployment for a single-replica DB:
-#   - StatefulSet gives a stable pod name (`postgres-0`) so the api can
-#     reference `postgres-service` and Kubernetes DNS resolves to the
-#     same pod across restarts. With a Deployment, the pod name changes
-#     on each restart and any logic referencing the pod directly breaks.
-#   - StatefulSet enforces ordered, deliberate startup, the pod is
-#     `Ready` only after the readiness probe passes. The api Deployment's
-#     `depends_on` analogue (init container + kubectl wait) relies on
-#     this guarantee.
-#   - Even at one replica, StatefulSet is the correct kind for ULO1
-#     evidence ("show stateful workload orchestration"). A Deployment
-#     would weaken the rubric story.
-#
-# Image matches docker-compose.yml so dev parity is exact. `postgres:16-
-# alpine` is ~80 MB and pulls fast on Docker Desktop.
+# StatefulSet (not Deployment) for stable pod name `postgres-0` so the api
+# can reference `postgres-service` and Kubernetes DNS resolves consistently.
 
 apiVersion: apps/v1
 kind: StatefulSet
@@ -31,19 +16,10 @@ spec:
       labels:
         app: postgres
     spec:
-      # No pod-level `runAsNonRoot: true` here, intentionally. The
-      # official postgres:16-alpine entrypoint needs root briefly during
-      # initdb to chown /var/lib/postgresql/data and run cluster setup
-      # before dropping to the `postgres` user (UID 70) via gosu for the
-      # actual server. Forcing runAsNonRoot at the pod level would block
-      # initdb and crash-loop the pod on first boot. The image's own
-      # drop-to-postgres-user step is the security boundary here.
-      #
-      # Symmetry vs api Deployment: the api container starts as USER node
-      # already (set in the Dockerfile after the build), so its
-      # securityContext can be aggressive. Postgres starts as root by
-      # necessity, transitions to non-root via the image entrypoint.
-      # Two different boot paths, both end non-root in steady state.
+      # No pod-level runAsNonRoot: postgres:16-alpine needs root briefly
+      # during initdb (chown of /var/lib/postgresql/data) before dropping
+      # to the postgres user via gosu. Forcing runAsNonRoot crash-loops
+      # the pod on first boot.
       containers:
         - name: postgres
           image: postgres:16-alpine
@@ -51,9 +27,6 @@ spec:
             - name: postgres
               containerPort: 5432
           env:
-            # POSTGRES_USER + POSTGRES_DB are non-secret config and could
-            # live in the ConfigMap, but Postgres reads them via env so
-            # keeping them inline here removes a cross-reference.
             - name: POSTGRES_USER
               value: feastbox
             - name: POSTGRES_DB
@@ -63,21 +36,13 @@ spec:
                 secretKeyRef:
                   name: feastbox-secret
                   key: POSTGRES_PASSWORD
-            # PGDATA in a subdirectory of the mounted volume. The
-            # Postgres image refuses to initialise into the volume root
-            # because the mount point already has a `lost+found` dir
-            # (Docker Desktop hostpath PVCs) that Postgres reads as
-            # "not empty, won't init". Putting PGDATA in a subdirectory
-            # avoids this conflict on first boot.
+            # PGDATA in a subdir avoids the lost+found conflict on Docker
+            # Desktop hostpath PVCs.
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
-          # Resource requests/limits: small enough for Docker Desktop's
-          # default 2-4 GB memory allocation. The 250m CPU request lets
-          # the api HPA (api-hpa.yaml) have headroom for replicas to
-          # scale up without the node going CPU-pressured.
           resources:
             requests:
               cpu: 100m
@@ -86,19 +51,15 @@ spec:
               cpu: 500m
               memory: 256Mi
           readinessProbe:
-            # `pg_isready -d feastbox` probes the actual app DB, not the
-            # default maintenance DB, matches the compose healthcheck
-            # for the same reason (catch POSTGRES_DB init failures).
             exec:
               command: ["pg_isready", "-U", "feastbox", "-d", "feastbox"]
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
           livenessProbe:
-            # failureThreshold: 6 (api Deployment uses 3) because Postgres
-            # can stall briefly under fsync pressure or vacuum work; we want
-            # the kubelet to be generous before declaring the pod dead and
-            # losing the in-flight transactions a restart would interrupt.
+            # failureThreshold: 6 (api uses 3) because Postgres can stall
+            # briefly under fsync; generous threshold avoids losing
+            # in-flight transactions to a premature restart.
             exec:
               command: ["pg_isready", "-U", "feastbox", "-d", "feastbox"]
             initialDelaySeconds: 30
