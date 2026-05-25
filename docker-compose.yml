@@ -1,3 +1,33 @@
+# docker-compose.yml — local container stack for the FeastBox backend.
+#
+# Two services:
+#   db   — Postgres 16 (the SAME image and version as the K8s StatefulSet
+#          in Phase 4, so dev parity is real, not "close enough").
+#   api  — Express + Prisma, built from the root Dockerfile.
+#
+# Frontend (Vue SPA) is NOT compose-ised. It runs on the host via
+# `npm run dev` against the api service exposed on localhost:3000.
+# Same model as the assessed K8s demo.
+#
+# Two ways to use this file:
+#
+#   1. Full stack: `docker compose up --build` — both services up. The
+#      api boots, applies pending migrations, then `node server.js`.
+#      Seed the DB once with:
+#         docker compose run --rm api node prisma/seed.js
+#
+#   2. DB-only (dev loop): `docker compose up -d db` — Postgres in a
+#      container, Express runs on the host via `npm --prefix server
+#      run dev` for hot-reload. The root `npm run dev:all` script
+#      wires this path automatically.
+#
+# IMPORTANT (path 1 foot-gun): `docker compose up` reuses the cached
+# `feastbox-api:latest` image when one exists. After editing the
+# Dockerfile, ALWAYS pass `--build`:
+#     docker compose up --build
+# Otherwise the api container keeps running the previous image with
+# zero indication that the new Dockerfile didn't apply.
+
 services:
   db:
     image: postgres:16-alpine
@@ -5,16 +35,91 @@ services:
       POSTGRES_USER: feastbox
       POSTGRES_PASSWORD: feastbox_dev
       POSTGRES_DB: feastbox
-      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "5433:5432"
+      # Host-side 5433 (not 5432) because Windows often has a native
+      # Postgres service on 5432 — colliding ports break `docker compose
+      # up` with an opaque "port already allocated" error. Container-side
+      # is always 5432, the canonical Postgres port.
+      - "127.0.0.1:5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U feastbox"]
+      # pg_isready is the canonical Postgres readiness probe. Healthcheck
+      # gates the api service's `depends_on: condition: service_healthy`,
+      # so without this block the api would race the DB on first boot
+      # and crash with ECONNREFUSED.
+      #
+      # `-d feastbox` probes the actual application database, not the
+      # default `postgres` maintenance DB. Without it, the probe passes
+      # the moment the server accepts connections — even if POSTGRES_DB
+      # failed to initialise, leaving api to crash on a missing-database
+      # error. Probing the DB the app actually depends on is the safer
+      # semantics.
+      test: ["CMD-SHELL", "pg_isready -U feastbox -d feastbox"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # The image tag matches what k8s/api-deployment.yaml (Phase 4 Task 18)
+    # expects so the same image can be used by both. Docker Desktop's
+    # built-in Kubernetes reads from the local image cache when
+    # `imagePullPolicy: Never` is set, so a `docker compose build` here
+    # populates the cache for kubectl too.
+    image: feastbox-api:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    # JWT_SECRET and JWT_REFRESH_SECRET are sourced from server/.env (gitignored)
+    # so they never appear in tracked files or git history. Run:
+    #   cp server/.env.example server/.env  (then fill in real values)
+    # before `docker compose up` on a fresh checkout.
+    # `environment` keys below OVERRIDE matching keys from env_file, so
+    # DATABASE_URL, CLIENT_URL, NODE_ENV, and PORT are always compose-specific.
+    env_file:
+      - ./server/.env
+    environment:
+      # The DATABASE_URL hostname `db` is the compose service name —
+      # Docker's internal DNS resolves it to the postgres container.
+      # Overrides the localhost-based DATABASE_URL in server/.env.
+      DATABASE_URL: postgresql://feastbox:feastbox_dev@db:5432/feastbox
+      # CLIENT_URL: multi-origin allowlist (commit 0c42275). Only the Vue
+      # dev server's origin needs to be listed. The in-container wget
+      # HEALTHCHECK does NOT send an Origin header, and even if it did,
+      # the request would be same-origin to the api itself — so adding
+      # localhost:3000 to the allowlist was dead config and is removed.
+      CLIENT_URL: http://localhost:5173
+      NODE_ENV: production
+      PORT: "3000"
+    ports:
+      - "127.0.0.1:3000:3000"
+    # on-failure restarts api on a non-zero exit (e.g. a transient DB
+    # blip after first boot) without restarting on `docker compose down`.
+    # The Phase 4 K8s Deployment will provide the same posture by default.
+    restart: on-failure
+    # Override the Dockerfile CMD to apply pending migrations BEFORE
+    # starting the server. `prisma migrate deploy` is idempotent — it's
+    # a no-op when the DB is current — so re-running compose is cheap.
+    # The Dockerfile CMD stays clean (just `node server.js`) so the same
+    # image deploys to K8s where migrations run via a separate Job
+    # (Phase 4 Task 17 postgres-migration-job.yaml).
+    # `exec` replaces the shell so Node becomes the direct child of tini.
+    # Without exec, tini's SIGTERM is sent to `sh`, which may not forward it
+    # to Node — defeating the clean-shutdown guarantee tini provides.
+    command: ["sh", "-c", "npx prisma migrate deploy && exec node server.js"]
+    healthcheck:
+      # Independent of the Dockerfile HEALTHCHECK — compose's healthcheck
+      # block overrides it. Same shape, tuned for faster local feedback
+      # (10s interval vs the Dockerfile's 30s, 15s start_period vs 10s)
+      # so a dev iteration sees Healthy state within ~15 s of `up`.
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
 volumes:
   postgres_data:
