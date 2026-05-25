@@ -1,0 +1,29 @@
+# k8s/postgres-pvc.yaml, PersistentVolumeClaim for the Postgres data dir.
+#
+# Why a separate PVC instead of `volumeClaimTemplates` inside the
+# StatefulSet: a single-replica DB does not benefit from the per-pod
+# volume claims a StatefulSet generates for >1 replicas, and an explicit
+# PVC makes the storage layer reviewable in isolation (one file, one
+# claim, one deletion target during teardown).
+#
+# 1Gi is generous for an 8-meal seed plus a few orders. Docker Desktop's
+# default StorageClass is `hostpath` (Windows) which provisions instantly
+# and survives `kubectl delete pvc` only if the storage class has
+# `reclaimPolicy: Retain` (default is Delete). For the assessed demo,
+# data loss on tear-down is intentional, fresh `bash apply.sh` runs
+# should reseed cleanly.
+#
+# ReadWriteOnce: a single node mounts the volume. Multi-node would
+# require ReadWriteMany + a network FS (NFS, CephFS). Docker Desktop is
+# single-node so this is the only viable option here.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

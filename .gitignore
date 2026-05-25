@@ -16,6 +16,9 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Kubernetes Secret with real values — only secret.example.yaml is tracked.
+k8s/secret.yaml
+
 # Project docs and AI tooling — never commit to remote
 CLAUDE.md
 docs_foundation/

@@ -1,0 +1,27 @@
+# k8s/configmap.yaml, non-sensitive runtime configuration.
+#
+# ConfigMap vs Secret split: the K8s convention is "secrets in Secrets,
+# config in ConfigMaps". Splitting keeps the Secret object small and lets
+# us update CLIENT_URL without re-applying credentials. The api Deployment
+# (api-deployment.yaml) consumes BOTH via envFrom so the application sees
+# a flat env namespace.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: feastbox-config
+data:
+  # CLIENT_URL: comma-separated allowlist (commit 0c42275). For the K8s
+  # demo, the frontend runs on the host via `npm run dev` against the
+  # api's LoadBalancer at localhost:3000, so the allowed origin is the
+  # Vite dev server. If you record the demo against a Vercel deployment,
+  # add that origin too (comma-separated, no spaces).
+  CLIENT_URL: "http://localhost:5173"
+
+  # NODE_ENV: production-mode logger, no source-map exposure on errors,
+  # cookie `secure` flag flips on. Matches the docker-compose api service.
+  NODE_ENV: "production"
+
+  # PORT: the Express listen port inside the pod. The Service
+  # (api-service.yaml) re-exposes this as port 3000 on the LoadBalancer.
+  PORT: "3000"
