@@ -31,7 +31,7 @@ echo "==> Build ${IMAGE_TAG}"
 (cd "$REPO_ROOT" && docker build -t "${IMAGE_TAG}" .)
 
 echo "==> Save image to tarball for ctr import"
-docker save "${IMAGE_TAG}" -o /tmp/feastbox-api.tar
+docker save "${IMAGE_TAG}" -o ./feastbox-api.tar
 
 echo "==> Apply Secret + ConfigMap"
 kubectl apply -f "$SCRIPT_DIR/secret.yaml"
