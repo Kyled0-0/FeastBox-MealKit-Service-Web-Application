@@ -1,5 +1,4 @@
-# Non-sensitive runtime config. Loaded into the api Deployment via envFrom
-# alongside the Secret.
+
 
 apiVersion: v1
 kind: ConfigMap

@@ -19,8 +19,12 @@ dist-ssr
 # Kubernetes Secret with real values — only secret.example.yaml is tracked.
 k8s/secret.yaml
 
+# Docker image tarball produced by k8s/apply.sh (docker save), regenerated each deploy.
+feastbox-api.tar
+
 # Personal demo reference (not part of the submission repo)
 DEMO_RUNBOOK.txt
+DEMO_COMMANDS.txt
 
 # Deakin assessment task brief (local-only reference)
 SIT226-7_2HD.md
