@@ -10,7 +10,7 @@ A fullstack meal-kit delivery web application. Browse curated meal plans, manage
 
 [feast-box-vue.vercel.app](https://feast-box-vue.vercel.app) (frontend only, pre-backend snapshot)
 
-For the current fullstack version, see [Run locally](#run-locally) or [Deploy to Kubernetes](#deployment) below.
+For the current fullstack version, see [Run locally](#run-locally) or [Deploy to Kubernetes](#deploy-to-kubernetes) below.
 
 ---
 
@@ -28,14 +28,9 @@ For the current fullstack version, see [Run locally](#run-locally) or [Deploy to
 - bcrypt + Zod + helmet + Pino + DOMPurify
 
 **Infrastructure**
-<<<<<<< Updated upstream
-- Docker + docker-compose
-- Vercel (frontend)
-=======
 - Docker (multi-stage, non-root, tini PID 1) + docker-compose
 - Kubernetes (StatefulSet, Deployment, HPA, Migration Job, in-cluster Registry)
 - Vercel (frontend, planned)
->>>>>>> Stashed changes
 
 ---
 
@@ -196,7 +191,27 @@ VITE_API_URL=http://localhost:3000
 | Frontend public | Vercel | Planned |
 | Backend public | Render + Neon Postgres | Planned |
 
-For the Kubernetes deploy walkthrough — manifests, ordering rationale, autoscaling demo, and ULO mapping — see [HD_README.md](./HD_README.md).
+### Deploy to Kubernetes
+
+A single script builds the image and brings up the full stack on a local
+Docker Desktop Kubernetes cluster:
+
+```bash
+# One-time: provide real secret values
+cp k8s/secret.example.yaml k8s/secret.yaml
+# edit k8s/secret.yaml: POSTGRES_PASSWORD, JWT_SECRET, JWT_REFRESH_SECRET, DATABASE_URL
+
+# Build + deploy everything (run from the repo root, Git Bash or WSL)
+bash k8s/apply.sh
+```
+
+`apply.sh` builds the API image, loads it into the cluster, installs
+metrics-server (pinned v0.8.1, so the HorizontalPodAutoscaler has a metrics
+API and scales instead of reading `<unknown>`), then applies the Secret,
+ConfigMap, Postgres StatefulSet, run-once Migration Job, API Deployment,
+LoadBalancer Service, and HPA in dependency order, waiting on each rollout.
+The API is reachable at `http://localhost:3000` when the script finishes; it
+also prints the one-off seed command.
 
 ---
 
@@ -218,14 +233,6 @@ This project applies named software engineering principles to every tool and arc
 ## Roadmap
 
 **Phase 0 — Frontend optimisation**
-<<<<<<< Updated upstream
-- [x] Vue 3 frontend — meal browsing, cart, UI
-- [x] Debounced multi-field search composable (`useSearch`)
-- [x] Client-side pagination composable (`usePagination`)
-- [x] Route-level lazy loading
-- [x] `v-memo` on static meal cards
-- [x] Pinia store audit — flatten state, remove no-op getters
-=======
 - [x] Vue 3 SPA — meal browsing, checkout wizard, UI
 - [x] Debounced multi-field search composable (`useSearch`)
 - [x] Client-side pagination composable (`usePagination`)
@@ -234,26 +241,12 @@ This project applies named software engineering principles to every tool and arc
 - [x] `v-memo` on static meal cards
 - [x] Pinia store audit — flatten state, remove no-op getters
 - [x] CSS tokens, accessibility pass (aria-hidden, inputmode)
->>>>>>> Stashed changes
 
 **Phase 1 — Frontend deploy**
 - [x] Vercel deployment (pre-backend snapshot)
 - [ ] Re-deploy against the live backend
 
 **Phase 2 — Backend + database**
-<<<<<<< Updated upstream
-- [x] Monorepo structure (`/client`, `/server`)
-- [x] Express API + PostgreSQL schema
-- [x] JWT authentication (register, login, refresh)
-- [x] Meals + orders endpoints
-- [ ] Stripe checkout + webhook
-
-**Phase 3 — Containerisation + CI/CD**
-- [x] Docker + docker-compose
-
-**Future Enhancements**
-- [ ] GitHub Actions CI/CD
-=======
 - [x] Express API + PostgreSQL schema (Prisma)
 - [x] JWT authentication (register, login, refresh, algorithm pinning)
 - [x] Meals endpoints with server-side XSS sanitisation
@@ -284,7 +277,6 @@ This project applies named software engineering principles to every tool and arc
 - [ ] Pod Disruption Budget
 
 **Future enhancements**
->>>>>>> Stashed changes
 - [ ] AI recipe chatbot (Anthropic API)
 - [ ] OAuth login (Google)
 - [ ] Stripe subscription billing
