@@ -38,6 +38,8 @@ Plan_ORG/
 .mcp.json
 *.pkl
 feastbox-source-dump.txt
+.agents/
+skills-lock.json
 
 # Editor directories and files
 .vscode/*
